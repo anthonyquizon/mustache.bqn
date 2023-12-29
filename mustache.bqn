@@ -1,5 +1,6 @@
 # Reference: http://mustache.github.io/mustache.5.html
 #            https://juuso.dev/blogPosts/barbell/barbell.html
+#            https://www.youtube.com/watch?v=5I4YPkVU7mY
 opn‿cls ← "{{"‿"}}"
 
 L←•Show
