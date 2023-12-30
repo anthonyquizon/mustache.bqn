@@ -27,12 +27,12 @@ nested ← {
   }
 }
 
+# TODO use _while_
+_Fix ← {𝔽∘⊢⍟≢⟜𝔽_𝕣∘⊢⍟≢⟜𝔽𝕩}
+
 Delete ← { (/𝕨)(⊢-⍋)(¬𝕨)/𝕩 }
 Parent ← { g←⊔𝕩 ⋄ (↕≠𝕩) {a‿w←𝕨 ⋄ (⊏⟜a 1-˜a⍋w)⌾(w⊸⊏) 𝕩 }´ (1↓(»g){𝕨‿𝕩}¨g) }
-
-Depth ← { p ← 𝕩 
-  L ↕≠p
-}
+Depth  ← { d←𝕩≠(↕≠𝕩) ⋄ { z←𝕩⊏p ⋄ d+↩z≠𝕩 ⋄ z } _Fix 𝕩 ⋄ d } 
 
 Compile ← {
   # rp: replace parent, rv: replace values, r: references, t: types, p: parent, ch: characters, n: names
