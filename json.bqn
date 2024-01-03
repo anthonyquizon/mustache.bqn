@@ -31,7 +31,7 @@ ty ← {
    { m←t=ty.str ⋄ f← »⊸< m ⋄ i←m×+`f ⋄ z ←f∨t≠ty.str ⋄ n ↩ ⊏⟜ch¨⊔1-˜i ⋄ ch z⊸/↩ ⋄ t z⊸/↩  ⋄ r ↩ 1-˜z/f×i }
    # tokenize keys
    { col←(t=ty.col) ⋄ str←(t=ty.str) ⋄ m ← str∧«col ⋄ z←¬col ⋄ t↩z/ty.key¨⌾(m⊸/)t ⋄ ch z⊸/↩ ⋄ r z⊸/↩ }
-
+   # TODO remove commas now that we have typed nodes
    [ch,t,r]
 
    # init parent
