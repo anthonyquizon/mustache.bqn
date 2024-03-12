@@ -4,7 +4,7 @@
 # - all values are strings
 # - trailing commas are allowed
 
-⟨Parent, Delete⟩ ← •Import "helpers.bqn" 
+⟨Parent, Delete⟩ ← •Import "tree.bqn" 
 
 
 type ← { 
