@@ -3,3 +3,7 @@ Parent ⇐ { g←⊔¯1⌽𝕩 ⋄ (↕≠𝕩) {a‿w←𝕨 ⋄ (⊏⟜a 1-˜a
 Delete ⇐ { (/¬𝕨)(⊢-⍋)𝕨/𝕩 } # delete from parent vector
 
 # TODO print tree
+Print ⇐ {
+   
+
+}

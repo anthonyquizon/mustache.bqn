@@ -5,12 +5,7 @@ opn‿cls ← "{{"‿"}}"
 
 L←•Show
 
-# types
-types ← {
-  b ⇐ 1 # base node
-  s ⇐ 2 # start node
-  e ⇐ 3 # end node
-}
+type ← { none ⇐ 0 ⋄ opn_bkt ⇐ 1 ⋄ cls_bkt ⇐ 2 ⋄ opn ⇐ 3 ⋄ cls ⇐ 4 ⋄ hash ⇐ 6 ⋄ end⇐7 ⋄ opn_pair ⇐ 8 ⋄ cls_pair ⇐ 9 }
 
 nested ← {
   Depth ⇐ {
@@ -35,79 +30,94 @@ Parent ← { g←⊔𝕩 ⋄ (↕≠𝕩) {a‿w←𝕨 ⋄ (⊏⟜a 1-˜a⍋w)�
 Depth  ← { p←𝕩 ⋄ d←p≠(↕≠p) ⋄ { z←𝕩⊏p ⋄ d+↩z≠𝕩 ⋄ z } _Fix p ⋄ d } 
 
 Compile ← {
-  # rp: replace parent, rv: replace values, r: references, t: types, p: parent, ch: characters, n: names
-  rp‿rv ← 𝕨 ⋄ rn ← (≠rp)⥊¯1 ⋄ ch ← •file.Chars 𝕩 ⋄ r ← (≠ch)⥊¯1 ⋄ t ← p ← (≠ch)⥊0 ⋄ n ← @
+  [rp,rt,rr]←𝕨.ptr ⋄ rn←𝕨.names ⋄ ch←𝕩 ⋄ r←(≠ch)⥊¯1 ⋄ t←p←(≠ch)⥊0 ⋄ n←@ ⋄ d←@
 
-  Print ← { 𝕊: •Show [rp, rv, rn] ⋄ •Show [p, t, r] ⋄ •Show n }
+  { t↩ ∨´⟨type.opn_bkt,type.cls_bkt,type.hash,type.end⟩×ch⊸=¨"{}#/" }                                                               # tokenize types
 
-  # get open and close enclose bits
-  o‿c ← {∨⟜»⍟(1-˜≠𝕩)(≠ch)↑𝕩⍷ch}¨opn‿cls
+  •Show t
+  { m←t=type.opn_bkt ⋄ t↩t∨type.opn_pair×»⊸< m ⋄ t (¬m)⊸/↩ ⋄ ch (¬m)⊸/↩}               # collapse double start brackets
+  { m←t=type.cls_bkt ⋄ t↩t∨type.cls_pair×»⊸< m ⋄ t (¬m)⊸/↩ ⋄ ch (¬m)⊸/↩}               # collapse double end brackets
 
-  # pass: mark names in types
-  { t ↩ +`(»>⟜«o)+-(»⊸<c) }
+  
+  #o‿c ← {∨⟜»⍟(1-˜≠𝕩)(≠ch)↑𝕩⍷ch}¨opn‿cls                                               # get open and close enclose bits
+  #{ t↩+`(»>⟜«o)+-(»⊸<c) }                                                             # mark names in types
+  #{ d↩(¬o∨c) ⋄ ch d⊸/↩ ⋄ p d⊸/↩ ⋄ t d⊸/↩ ⋄ r d⊸/↩ }                                   # remove brackets
 
-  # pass: remove brackets
-  { d ← (¬o∨c) ⋄ ch d⊸/ ↩ ⋄ p d⊸/ ↩ ⋄ t d⊸/ ↩ ⋄ r d⊸/ ↩ }
+  #•Show (¬o∨c)
 
-  # pass: names to '$' nodes with types and references to original names
-  {
-    i ← (0⊸≠≠¨)⊸/⊔(⊢-˜¬×+`)¬t=types.b
+  #{ i←(0⊸≠≠¨)⊸/⊔(⊢-˜¬×+`)¬t=types.b ⋄ nm←(¬∊⟜"#/")⊸/¨ ⊏⟜ch¨i                          # names to '$' nodes with types and references to original names
+    #b←(≠ch)↑(/⁼0⊑¨i) ⋄ s←types.s×b∧ch='#' ⋄ e←types.e×b∧ch='/' ⋄ del←(t=types.b)×¬b
 
-    nm ← (¬∊⟜"#/")⊸/¨ ⊏⟜ch¨i # names: extracted node strings
-    b ← (≠ch)↑(/⁼0⊑¨i) # base nodes - start of nodes
-    s ← types.s×b∧ch='#' # start nodes
-    e ← types.e×b∧ch='/' # end nodes
-    d ← (t=types.b)×¬b
-
-    rn ↩ ¯1¨⌾(((≠nm)=nm⊐rv)⊸/) nm⊐rv
-    n  ↩ (≍⟜⊐) nm
-    r  ↩ (¬d)/(⊐nm)⌾(b⊸/) r
-    p  ↩ d Delete p
-    t  ↩ (¬d)/⌈´b‿s‿e
-    ch ↩ (¬d)/'$'¨⌾(b⊸/) ch
-  }
-
-  # pass: construct parents from start/end nodes
-  { p ↩ +`(»>⟜«(t=types.s))+-(»⊸<(t=types.e)) }
-
-  Print @
-  # pass: expand loops to flatten structure
-  {
-    # get depth of value tree
-    # get depth of template tree
-
-    L
-
-    # bind variables to 
-    #L (¯1≠rn)/rp
-    #L (¯1≠rn)/rn
-    #L (types.s=(p⊏t))
-    #L (types.s=(p⊏t))∧(t=types.b)
-    #o ← t=types.s ⋄ c ← t=types.e
-    # delete parent node
-  }
+    ##rn ↩ ¯1¨⌾(((≠nm)=nm⊐rv)⊸/) nm⊐rv
+    #•Show nm
+    #•Show s
+    #•Show e
+    #•Show ⌈´d
+  #}
+  #d ← (t=types.b)×¬b
 
 }
 
-•Show "--"
+#Compile0 ← {
+  ## rp: replace parent, rv: replace values, r: references, t: types, p: parent, ch: characters, n: names
+  #rp‿rv ← 𝕨 ⋄ rn ← (≠rp)⥊¯1 ⋄ ch ← •file.Chars 𝕩 ⋄ r ← (≠ch)⥊¯1 ⋄ t ← p ← (≠ch)⥊0 ⋄ n ← @
 
+  #Print ← { 𝕊: •Show [rp, rv, rn] ⋄ •Show [p, t, r] ⋄ •Show n }
+
+  #o‿c ← {∨⟜»⍟(1-˜≠𝕩)(≠ch)↑𝕩⍷ch}¨opn‿cls               # get open and close enclose bits
+  #t ↩ +`(»>⟜«o)+-(»⊸<c)                               # pass: mark names in types
+  #d ← (¬o∨c) ⋄ ch d⊸/ ↩ ⋄ p d⊸/ ↩ ⋄ t d⊸/ ↩ ⋄ r d⊸/ ↩ # pass: remove brackets
+
+  ## pass: names to '$' nodes with types and references to original names
+  #{
+    #i ← (0⊸≠≠¨)⊸/⊔(⊢-˜¬×+`)¬t=types.b
+
+    #nm ← (¬∊⟜"#/")⊸/¨ ⊏⟜ch¨i # names: extracted node strings
+    #b ← (≠ch)↑(/⁼0⊑¨i) # base nodes - start of nodes
+    #s ← types.s×b∧ch='#' # start nodes
+    #e ← types.e×b∧ch='/' # end nodes
+    #d ← (t=types.b)×¬b
+
+    #rn ↩ ¯1¨⌾(((≠nm)=nm⊐rv)⊸/) nm⊐rv
+    #n  ↩ (≍⟜⊐) nm
+    #r  ↩ (¬d)/(⊐nm)⌾(b⊸/) r
+    #p  ↩ d Delete p
+    #t  ↩ (¬d)/⌈´b‿s‿e
+    #ch ↩ (¬d)/'$'¨⌾(b⊸/) ch
+  #}
+
+
+  #p ↩ +`(»>⟜«(t=types.s))+-(»⊸<(t=types.e))           # pass: construct parents from start/end nodes
+
+  #Print @
+#}
 
 
 json ← •Import "./json.bqn"
 
-data ←  ⟨
-  ⟨"points", ⟨
-      ⟨"cx", "10"⟩, ⟨"cy", "1"⟩
-      ⟨"cx", "10"⟩, ⟨"cy", "1"⟩
-  ⟩⟩,
-⟩
+data ← json.Compile "
+   {
+      each: [ foo: 111, bar: 222 ]
+   }
+"
+
+•Show data.ptr‿data.names
+
+data Compile (•file.Chars "test.mustache")
+
+#data ←  ⟨
+  #⟨"points", ⟨
+      #⟨"cx", "10"⟩, ⟨"cy", "1"⟩
+      #⟨"cx", "10"⟩, ⟨"cy", "1"⟩
+  #⟩⟩,
+#⟩
 
 #•Show (Flatten data)
 #•Show (Depth ⟨⟩)
 #•Show (Depth data)≍(Flatten data)
 #•Show Parent 0‿1‿2‿1‿2‿3‿2‿1‿2‿3‿3‿2‿3‿3‿2
-p ← (Parent (nested.Depth data))
-v ← (nested.Flatten data)
+#p ← (Parent (nested.Depth data))
+#v ← (nested.Flatten data)
 #L Depth p
 
 #d ← [0,       1,         1,    2,    3,    2,    3]
@@ -139,16 +149,16 @@ v ← (nested.Flatten data)
 
 #}
 
-{
-  p ← 0‿0‿0‿3‿3‿3
-  c ← "abcdef"
-  L [p,c]
+#{
+  #p ← 0‿0‿0‿3‿3‿3
+  #c ← "abcdef"
+  #L [p,c]
 
    
-}
+#}
 
 
 
-#p‿v Compile "./test.mustache"
+#p‿v Compile "test.mustache"
 
-•Show "done"
+#•Show "done"
