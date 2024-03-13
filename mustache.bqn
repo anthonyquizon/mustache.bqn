@@ -5,22 +5,10 @@ opn‿cls ← "{{"‿"}}"
 
 L←•Show
 
-type ← { none ⇐ 0 ⋄ opn_bkt ⇐ 1 ⋄ cls_bkt ⇐ 2 ⋄ opn ⇐ 3 ⋄ cls ⇐ 4 ⋄ hash ⇐ 6 ⋄ end⇐7 ⋄ opn_pair ⇐ 8 ⋄ cls_pair ⇐ 9 }
-
-nested ← {
-  Depth ⇐ {
-        𝕊 𝕩 : 0 𝕊 𝕩
-    ; 𝕨 𝕊 ⟨⟩ : ⟨𝕨⟩ 
-    ; 𝕨 𝕊 𝕩 : 1=≡𝕩 ? 𝕨
-    ; 𝕨 𝕊 𝕩 : ∾𝕨 𝕊 { 𝕨∾(𝕨+1)𝔽⊑1↓𝕩 }¨𝕩
-  }
-
-  Flatten ⇐ {
-      𝕊 ⟨⟩ : ⟨⟨⟩⟩
-    ; 𝕊 𝕩  : 3=≡𝕩 ? ∾ 𝕩
-    ; 𝕊 𝕩  : ∾ 𝕊 { h‿t ← 𝕩 ⋄ ⟨h⟩ ∾ 𝔽 t }¨𝕩
-  }
-}
+# types
+⟨ none, opn_bkt, cls_bkt, hash, slash,            # characters
+  opn_dm, cls_dm, start_node, end_node      # nodes
+⟩ ← ↕9
 
 # TODO use _while_
 _Fix ← {𝔽∘⊢⍟≢⟜𝔽_𝕣∘⊢⍟≢⟜𝔽𝕩}
@@ -28,15 +16,42 @@ _Fix ← {𝔽∘⊢⍟≢⟜𝔽_𝕣∘⊢⍟≢⟜𝔽𝕩}
 Delete ← { (/𝕨)(⊢-⍋)(¬𝕨)/𝕩 }
 Parent ← { g←⊔𝕩 ⋄ (↕≠𝕩) {a‿w←𝕨 ⋄ (⊏⟜a 1-˜a⍋w)⌾(w⊸⊏) 𝕩 }´ (1↓(»g){𝕨‿𝕩}¨g) }
 Depth  ← { p←𝕩 ⋄ d←p≠(↕≠p) ⋄ { z←𝕩⊏p ⋄ d+↩z≠𝕩 ⋄ z } _Fix p ⋄ d } 
+Leaf   ⇐ { ¬(↕≠𝕩)⍷𝕩 }
 
+# print without newline for debugging
+Print ← {
+  z←𝕨=@+10 
+  •Show [' '¨⌾(z⊸/) 𝕨, 𝕩]
+}
+
+#TODO line number info
 Compile ← {
   [rp,rt,rr]←𝕨.ptr ⋄ rn←𝕨.names ⋄ ch←𝕩 ⋄ r←(≠ch)⥊¯1 ⋄ t←p←(≠ch)⥊0 ⋄ n←@ ⋄ d←@
 
-  { t↩ ∨´⟨type.opn_bkt,type.cls_bkt,type.hash,type.end⟩×ch⊸=¨"{}#/" }                                                               # tokenize types
+  { t↩ ∨´⟨opn_bkt,cls_bkt,hash,slash⟩×ch⊸=¨"{}#/" }                                                   # tokenize character types
+  { m←t=opn_bkt ⋄ q←opn_dm×>⟜«m ⋄ z←(¬m)∨0<q ⋄ t↩z/t⌈q ⋄ ch↩z/ch }                     # find double start brackets then collapse and mark into a delimeter
+  { m←t=cls_bkt ⋄ q←cls_dm×>⟜«m ⋄ z←(¬m)∨0<q ⋄ t↩z/t⌈q ⋄ ch↩z/ch }                     # find double close brackets then collapse and mark into a delimeter
+  {
+    •Show o←(t=opn_dm)∧«(t=hash)
+    •Show c←(t=cls_dm)
+    •Show n←0<+`o-c # find name bounded
+    •Show z←o∨¬n∨c # collapse into open node
+    #•Show start_node×m
+    # TODO all the way to end delimeter and capture name
+    #t↩z/t⌈start_node×m
+    #ch↩z/ch
+    #•Show ∧⟜«m
+  }
+  #ch Print t
+  #{ m←t=cls_bkt ⋄ t↩t∨cls_dm×»⊸< m ⋄ t (¬m)⊸/↩ ⋄ ch (¬m)⊸/↩ }                     # find double end brackets then collapse and mark as dmeter
+  #{ 
+    #•Show m←t=opn_dm  
 
-  •Show t
-  { m←t=type.opn_bkt ⋄ t↩t∨type.opn_pair×»⊸< m ⋄ t (¬m)⊸/↩ ⋄ ch (¬m)⊸/↩}               # collapse double start brackets
-  { m←t=type.cls_bkt ⋄ t↩t∨type.cls_pair×»⊸< m ⋄ t (¬m)⊸/↩ ⋄ ch (¬m)⊸/↩}               # collapse double end brackets
+    #⋄ t↩t∨hash×»⊸< m   ⋄ t (¬m)⊸/↩ ⋄ ch (¬m)⊸/↩
+
+
+
+  #}                     # find double end brackets then collapse and mark as dmeter
 
   
   #o‿c ← {∨⟜»⍟(1-˜≠𝕩)(≠ch)↑𝕩⍷ch}¨opn‿cls                                               # get open and close enclose bits

@@ -13,7 +13,7 @@ _Fix   ← {𝔽∘⊢⍟≢⟜𝔽_𝕣∘⊢⍟≢⟜𝔽𝕩}
 type ← { none⇐0 ⋄ node⇐1 ⋄ horz⇐2 ⋄ mid⇐3 ⋄ start⇐4 ⋄ end⇐5 ⋄ vert⇐6 }
 
 Draw ⇐ {
-  p←𝕩 ⋄ r←{𝕩⊏p} _fix p ⋄ d←Depth 𝕩                      # r: roots. d: depth
+  p←𝕩 ⋄ r←{𝕩⊏p} _fix p ⋄ d←Depth 𝕩                    # r: roots. d: depth
   {
     par←@ ⋄ h←@ ⋄ n←@ ⋄ m←𝕩=r                         # init empty variables for hacking convience and mask for current root
     par↩{ (1+𝕩/m/p)⌾(𝕩⊸/) 𝕩 }˘m⊸/˘d=⌜˜↕⌈´d+1          # depth matrix to parent vector offset by 1 since null values are 0
