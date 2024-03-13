@@ -6,9 +6,9 @@ opn‿cls ← "{{"‿"}}"
 L←•Show
 
 # types
-⟨ none, opn_bkt, cls_bkt, hash, slash,            # characters
+⟨ none, opn_bkt, cls_bkt, hash, slash, str,            # characters
   opn_dm, cls_dm, start_node, end_node      # nodes
-⟩ ← ↕9
+⟩ ← ↕10
 
 # TODO use _while_
 _Fix ← {𝔽∘⊢⍟≢⟜𝔽_𝕣∘⊢⍟≢⟜𝔽𝕩}
@@ -26,22 +26,46 @@ Print ← {
 
 #TODO line number info
 Compile ← {
-  [rp,rt,rr]←𝕨.ptr ⋄ rn←𝕨.names ⋄ ch←𝕩 ⋄ r←(≠ch)⥊¯1 ⋄ t←p←(≠ch)⥊0 ⋄ n←@ ⋄ d←@
+  [rp,rt,rr]←𝕨.ptr ⋄ rn←𝕨.names ⋄ ch←𝕩 ⋄ t←p←(≠ch)⥊0 ⋄ r←@ ⋄ n←@ ⋄ d←@
 
-  { t↩ ∨´⟨opn_bkt,cls_bkt,hash,slash⟩×ch⊸=¨"{}#/" }                                                   # tokenize character types
+  { t↩ ∨´⟨opn_bkt,cls_bkt,hash,slash⟩×ch⊸=¨"{}#/" }                                    # tokenize character types
   { m←t=opn_bkt ⋄ q←opn_dm×>⟜«m ⋄ z←(¬m)∨0<q ⋄ t↩z/t⌈q ⋄ ch↩z/ch }                     # find double start brackets then collapse and mark into a delimeter
   { m←t=cls_bkt ⋄ q←cls_dm×>⟜«m ⋄ z←(¬m)∨0<q ⋄ t↩z/t⌈q ⋄ ch↩z/ch }                     # find double close brackets then collapse and mark into a delimeter
-  {
-    •Show o←(t=opn_dm)∧«(t=hash)
-    •Show c←(t=cls_dm)
-    •Show n←0<+`o-c # find name bounded
-    •Show z←o∨¬n∨c # collapse into open node
-    #•Show start_node×m
-    # TODO all the way to end delimeter and capture name
-    #t↩z/t⌈start_node×m
-    #ch↩z/ch
-    #•Show ∧⟜«m
+
+  # find fragments and nodes. ch no longer needed
+    # collapse all zeros to frags and node names
+  { m←t=none ⋄ s←>⟜» m ⋄ e←>⟜« m ⋄ z←(0<t)∨(0<s) ⋄
+    t↩ z/t⌈s×str ⋄ n↩ ⊏⟜ch¨1↓⊔m∧+`s ⋄ r↩ (↕≠n)⌾((t=str)⊸/) (≠t)⥊¯1
   }
+
+
+
+  # find start nodes
+  # find end nodes
+  # find  nodes
+
+  •Show [t,r]
+  •Show n
+  #{
+    #o←(t=opn_dm)∧«(t=hash)
+    #c←(t=cls_dm)
+
+    ##i ← (0⊸≠≠¨)⊸/⊔(⊢-˜¬×+`)¬t=types.b
+
+    #n←0<+`o-c # find name bounded
+    #•Show ¬×+`o-c
+    #z←o∨¬n∨c # collapse into open node
+    ##•Show start_node×m
+    ## TODO all the way to end delimeter and capture name
+    ##t↩z/t⌈start_node×m
+    ##ch↩z/ch
+    ##•Show ∧⟜«m
+  #}
+
+  
+  # find close node
+  # fragment to close node
+
   #ch Print t
   #{ m←t=cls_bkt ⋄ t↩t∨cls_dm×»⊸< m ⋄ t (¬m)⊸/↩ ⋄ ch (¬m)⊸/↩ }                     # find double end brackets then collapse and mark as dmeter
   #{ 
