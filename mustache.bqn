@@ -6,9 +6,10 @@ opn‿cls ← "{{"‿"}}"
 L←•Show
 
 # types
-⟨ none, opn_bkt, cls_bkt, hash, slash, str,            # characters
-  opn_dm, cls_dm, start_node, end_node      # nodes
-⟩ ← ↕10
+⟨ none, opn_bkt, cls_bkt, hash, slash, str,     # characters
+  opn_dm, cls_dm,                               # markers
+  node, start, end                              # nodes
+⟩ ← ↕11
 
 # TODO use _while_
 _Fix ← {𝔽∘⊢⍟≢⟜𝔽_𝕣∘⊢⍟≢⟜𝔽𝕩}
@@ -31,21 +32,45 @@ Compile ← {
   { t↩ ∨´⟨opn_bkt,cls_bkt,hash,slash⟩×ch⊸=¨"{}#/" }                                    # tokenize character types
   { m←t=opn_bkt ⋄ q←opn_dm×>⟜«m ⋄ z←(¬m)∨0<q ⋄ t↩z/t⌈q ⋄ ch↩z/ch }                     # find double start brackets then collapse and mark into a delimeter
   { m←t=cls_bkt ⋄ q←cls_dm×>⟜«m ⋄ z←(¬m)∨0<q ⋄ t↩z/t⌈q ⋄ ch↩z/ch }                     # find double close brackets then collapse and mark into a delimeter
+  { m←c∨+`(t=opn_dm)-(c←t=cls_dm) ⋄ t↩t×m }                                            # demote any characters outside delims as none
 
   # find fragments and nodes. ch no longer needed
     # collapse all zeros to frags and node names
-  { m←t=none ⋄ s←>⟜» m ⋄ e←>⟜« m ⋄ z←(0<t)∨(0<s) ⋄
-    t↩ z/t⌈s×str ⋄ n↩ ⊏⟜ch¨1↓⊔m∧+`s ⋄ r↩ (↕≠n)⌾((t=str)⊸/) (≠t)⥊¯1
+  { m←t=none ⋄ s←>⟜» m ⋄ e←>⟜« m 
+    z←(0<t)∨(0<s) ⋄ t↩ z/t⌈s×str ⋄ n↩ ⊏⟜ch¨1↓⊔m∧+`s ⋄ r↩ (↕≠n)⌾((t=str)⊸/) (≠t)⥊¯1
   }
 
+  # find nodes - delete open and close and lead with node flag
+  { o←t=opn_dm ⋄ c←t=cls_dm ⋄ z←¬c ⋄ t↩z/t⌈o×node ⋄ r↩z/r }
+  # mark start nodes
+  { m←(t=node)∧«(h←t=hash) ⋄ z←¬h ⋄ t↩z/t⌈m×start ⋄ r↩z/r}
+  # mark end nodes
+  { m←(t=node)∧«(h←t=slash) ⋄ z←¬h ⋄ t↩z/t⌈m×end ⋄ r↩z/r}
 
+  •Show t
+  # collapse into str and promote to node type
+  # the string that is the id
+  # keep everything including id but not open and close brackets
+  #{ m←0⌈+`((t=opn_dm)∧«(t=hash))-(»t=cls_dm) ⋄ s←(t=str)∧m
+    #•Show m
+    #z←s∨¬m ⋄ t↩z/t⌈m×start ⋄ r↩z/r
+  #}
 
-  # find start nodes
-  # find end nodes
+  #•Show t
+  ## find end nodes
+  ## collapse into str and promote to node type
+  #{ m←0⌈+`((t=opn_dm)∧«(t=slash))-(»t=cls_dm) ⋄ s←(t=str)∧m
+    #•Show ((t=opn_dm)∧«(t=slash))
+    #•Show (»t=cls_dm)
+    #z←s∨¬m ⋄ t↩z/t⌈m×end ⋄ r↩z/r
+  #}
+
+  ##•Show ¨n
+  #•Show [t,r]
+
   # find  nodes
 
-  •Show [t,r]
-  •Show n
+  #•Show n
   #{
     #o←(t=opn_dm)∧«(t=hash)
     #c←(t=cls_dm)
