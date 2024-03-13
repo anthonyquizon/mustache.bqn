@@ -7,7 +7,7 @@ L←•Show
 # types
 ⟨ none, opn_bkt, cls_bkt, hash, slash, str,     # characters
   opn_dm, cls_dm,                               # markers
-  node, opn, cls, var                           # tags
+  tag, opn, cls, var                            # tags
 ⟩ ← ↕12
 
 # TODO use _while_
@@ -27,18 +27,21 @@ Compile ← {
   { m←t=cls_bkt ⋄ q←cls_dm×>⟜«m ⋄ z←(¬m)∨0<q ⋄ t↩z/t⌈q ⋄ ch↩z/ch }                     # find double close brackets then collapse and mark into a delimeter
   { m←c∨+`(t=opn_dm)-(c←t=cls_dm) ⋄ t↩t×m }                                            # demote any characters outside delims as none
 
-  # find fragments and nodes. ch no longer needed
-    # collapse all zeros to frags and node names
+  # find fragments and tags. ch no longer needed
+    # collapse all zeros to frags and tag names
   { m←t=none ⋄ s←>⟜» m ⋄ e←>⟜« m 
     z←(0<t)∨(0<s) ⋄ t↩ z/t⌈s×str ⋄ n↩ ⊏⟜ch¨1↓⊔m∧+`s ⋄ r↩ (↕≠n)⌾((t=str)⊸/) (≠t)⥊¯1
   }
 
-  # find nodes - delete open and close and lead with node flag
-  { o←t=opn_dm ⋄ c←t=cls_dm ⋄ z←¬c ⋄ t↩z/t⌈o×node ⋄ r↩z/r }
-  # mark opn nodes - consume {{# and set str as id (»»)
-  { m←(t=node)∧(«t=hash)∧(id←««t=str) ⋄ z←¬∨⟜»m ⋄ t↩z/t⌈»»m×opn ⋄ r↩z/r }
-  # mark opn nodes - consume {{/ and set str as id (»»)
-  { m←(t=node)∧(«t=slash)∧(id←««t=str) ⋄ z←¬∨⟜»m ⋄ t↩z/t⌈»»m×cls ⋄ r↩z/r }
+  # find tags - delete open and close and lead with tag flag
+  { o←t=opn_dm ⋄ c←t=cls_dm ⋄ z←¬c ⋄ t↩z/t⌈o×tag ⋄ r↩z/r }
+  # mark opn tags - consume {{# and set str as id (»»)
+  { m←(t=tag)∧(«t=hash)∧(««t=str) ⋄ z←¬∨⟜»m ⋄ t↩z/t⌈»»m×opn ⋄ r↩z/r }
+  # mark cls tags - consume {{/ and set str as id (»»)
+  { m←(t=tag)∧(«t=slash)∧(««t=str) ⋄ z←¬∨⟜»m ⋄ t↩z/t⌈»»m×cls ⋄ r↩z/r }
+  # mark cls tags - consume {{ and set str as id (»)
+  { m←(t=tag)∧(«t=str) ⋄ z←¬m ⋄ t↩z/t⌈»m×var ⋄ r↩z/r }
+  #TODO mark vars tags
   # create parent vector
   { o←t=opn ⋄ c←t=cls ⋄ p↩Parent d←+`o-c }
 
@@ -55,14 +58,14 @@ Compile ← {
   #t ↩ +`(»>⟜«o)+-(»⊸<c)                               # pass: mark names in types
   #d ← (¬o∨c) ⋄ ch d⊸/ ↩ ⋄ p d⊸/ ↩ ⋄ t d⊸/ ↩ ⋄ r d⊸/ ↩ # pass: remove brackets
 
-  ## pass: names to '$' nodes with types and references to original names
+  ## pass: names to '$' tags with types and references to original names
   #{
     #i ← (0⊸≠≠¨)⊸/⊔(⊢-˜¬×+`)¬t=types.b
 
-    #nm ← (¬∊⟜"#/")⊸/¨ ⊏⟜ch¨i # names: extracted node strings
-    #b ← (≠ch)↑(/⁼0⊑¨i) # base nodes - opn of nodes
-    #s ← types.s×b∧ch='#' # opn nodes
-    #e ← types.e×b∧ch='/' # cls nodes
+    #nm ← (¬∊⟜"#/")⊸/¨ ⊏⟜ch¨i # names: extracted tag strings
+    #b ← (≠ch)↑(/⁼0⊑¨i) # base tags - opn of tags
+    #s ← types.s×b∧ch='#' # opn tags
+    #e ← types.e×b∧ch='/' # cls tags
     #d ← (t=types.b)×¬b
 
     #rn ↩ ¯1¨⌾(((≠nm)=nm⊐rv)⊸/) nm⊐rv
@@ -74,7 +77,7 @@ Compile ← {
   #}
 
 
-  #p ↩ +`(»>⟜«(t=types.s))+-(»⊸<(t=types.e))           # pass: construct parents from opn/cls nodes
+  #p ↩ +`(»>⟜«(t=types.s))+-(»⊸<(t=types.e))           # pass: construct parents from opn/cls tags
 
   #Print @
 #}
