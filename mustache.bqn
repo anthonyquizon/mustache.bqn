@@ -2,8 +2,6 @@
 #            https://juuso.dev/blogPosts/barbell/barbell.html
 #            https://www.youtube.com/watch?v=5I4YPkVU7mY
 
-L←•Show
-
 # types
 ⟨ none, opn_bkt, cls_bkt, hash, slash, str,     # characters
   opn_dm, cls_dm,                               # markers
@@ -18,9 +16,11 @@ Parent ⇐ { g←⊔¯1⌽𝕩 ⋄ (↕≠𝕩) {a‿w←𝕨 ⋄ (⊏⟜a 1-˜a
 Depth  ← { p←𝕩 ⋄ d←p≠(↕≠p) ⋄ { z←𝕩⊏p ⋄ d+↩z≠𝕩 ⋄ z } _Fix p ⋄ d } 
 Leaf   ⇐ { ¬(↕≠𝕩)⍷𝕩 }
 
+⟨Draw⟩ ← •Import "tree.bqn" 
+json ← •Import "./json.bqn"
 #TODO line number info
 Compile ← {
-  [rp,rt,rr]←𝕨.ptr ⋄ rn←𝕨.names ⋄ ch←𝕩 ⋄ t←@ ⋄ r←@ ⋄ n←@ ⋄ p←@
+  [ip,it,ir]←𝕨.ptr ⋄ rn←𝕨.names ⋄ ch←𝕩 ⋄ t←@ ⋄ r←@ ⋄ n←@ ⋄ p←@
 
   { t↩ ∨´⟨opn_bkt,cls_bkt,hash,slash⟩×ch⊸=¨"{}#/" }                                    # tokenize character types
   { m←t=opn_bkt ⋄ q←opn_dm×>⟜«m ⋄ z←(¬m)∨0<q ⋄ t↩z/t⌈q ⋄ ch↩z/ch }                     # find double opn brackets then collapse and mark into a delimeter
@@ -35,24 +35,34 @@ Compile ← {
 
   # find tags - delete open and close and lead with tag flag
   { o←t=opn_dm ⋄ c←t=cls_dm ⋄ z←¬c ⋄ t↩z/t⌈o×tag ⋄ r↩z/r }
-  # mark opn tags - consume {{# and set str as id (»»)
+  # mark opn tags - consume {# and set str as id (»»)
   { m←(t=tag)∧(«t=hash)∧(««t=str) ⋄ z←¬∨⟜»m ⋄ t↩z/t⌈»»m×opn ⋄ r↩z/r }
-  # mark cls tags - consume {{/ and set str as id (»»)
+  # mark cls tags - consume {/ and set str as id (»»)
   { m←(t=tag)∧(«t=slash)∧(««t=str) ⋄ z←¬∨⟜»m ⋄ t↩z/t⌈»»m×cls ⋄ r↩z/r }
-  # mark cls tags - consume {{ and set str as id (»)
+  # mark cls tags - consume { and set str as id (»)
   { m←(t=tag)∧(«t=str) ⋄ z←¬m ⋄ t↩z/t⌈»m×var ⋄ r↩z/r }
   #TODO mark vars tags
   # create parent vector
   { o←t=opn ⋄ c←t=cls ⋄ p↩Parent d←+`o-c }
+  •Show [p,t, r]
+  { m←(t=cls) ⋄ z←¬m ⋄ p↩m Delete p ⋄ t↩z/t ⋄ r↩z/r  } # remove cls tags since we dont need them anymore
 
-  •Show [p,t]
+  # match input tree to parent tree
+  { 
+    m←(t=opn)∨(t=cls)∨(t=var) 
+    Draw  (¬m) Delete p
+    Draw ip
+  }
+  #•Show [p,t]
+  #Draw p
+  #Draw ip
 }
 
 #Compile0 ← {
-  ## rp: replace parent, rv: replace values, r: references, t: types, p: parent, ch: characters, n: names
-  #rp‿rv ← 𝕨 ⋄ rn ← (≠rp)⥊¯1 ⋄ ch ← •file.Chars 𝕩 ⋄ r ← (≠ch)⥊¯1 ⋄ t ← p ← (≠ch)⥊0 ⋄ n ← @
+  ## ip: replace parent, rv: replace values, r: references, t: types, p: parent, ch: characters, n: names
+  #ip‿rv ← 𝕨 ⋄ rn ← (≠ip)⥊¯1 ⋄ ch ← •file.Chars 𝕩 ⋄ r ← (≠ch)⥊¯1 ⋄ t ← p ← (≠ch)⥊0 ⋄ n ← @
 
-  #Print ← { 𝕊: •Show [rp, rv, rn] ⋄ •Show [p, t, r] ⋄ •Show n }
+  #Print ← { 𝕊: •Show [ip, rv, rn] ⋄ •Show [p, t, r] ⋄ •Show n }
 
   #o‿c ← {∨⟜»⍟(1-˜≠𝕩)(≠ch)↑𝕩⍷ch}¨opn‿cls               # get open and close enclose bits
   #t ↩ +`(»>⟜«o)+-(»⊸<c)                               # pass: mark names in types
@@ -82,8 +92,6 @@ Compile ← {
   #Print @
 #}
 
-
-json ← •Import "./json.bqn"
 
 data ← json.Compile "
    {

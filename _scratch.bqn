@@ -20,6 +20,6 @@ z← Compile "
 
 "
 [p,t,r] ←z.ptr
-Draw p
+"abcdefghi" Draw p
 
 

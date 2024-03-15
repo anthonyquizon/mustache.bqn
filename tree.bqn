@@ -10,27 +10,37 @@ _Fix   ← {𝔽∘⊢⍟≢⟜𝔽_𝕣∘⊢⍟≢⟜𝔽𝕩}
 # ├─┬─┐
 # ○ ○ ○
 
-type ← { none⇐0 ⋄ node⇐1 ⋄ horz⇐2 ⋄ mid⇐3 ⋄ start⇐4 ⋄ end⇐5 ⋄ vert⇐6 }
+⟨none, horz, mid, start, end, vert⟩ ← ↕6
 
 Draw ⇐ {
-  p←𝕩 ⋄ r←{𝕩⊏p} _fix p ⋄ d←Depth 𝕩                    # r: roots. d: depth
-  {
-    par←@ ⋄ h←@ ⋄ n←@ ⋄ m←𝕩=r                         # init empty variables for hacking convience and mask for current root
-    par↩{ (1+𝕩/m/p)⌾(𝕩⊸/) 𝕩 }˘m⊸/˘d=⌜˜↕⌈´d+1          # depth matrix to parent vector offset by 1 since null values are 0
-    par↩∾˘(↕≠par) {«⍟𝕨 𝕩} ˘par                        # shift diagonal zeros to vertical line
-    s←×⟜∊˘par×>⟜»˘par ⋄ e←×⟜{⌽∊⌽𝕩}˘ par×>⟜«˘par       # mark start and ends of parent horizontals
+    𝕊 𝕩: ((≠𝕩)⥊'○') 𝕊 𝕩;
+  𝕨 𝕊 𝕩:
+    ch←𝕨 ⋄ p←𝕩 ⋄ r←{𝕩⊏p} _fix p ⋄ d←Depth 𝕩                    # r: roots. d: depth
+    •Show ch
+    •Show p
+    {
+      par←@ ⋄ h←@ ⋄ n←@ ⋄ m←𝕩=r                         # init empty variables for hacking convience and mask for current root
+      par↩{ (1+𝕩/m/p)⌾(𝕩⊸/) 𝕩 }˘m⊸/˘d=⌜˜↕⌈´d+1          # depth matrix to parent vector offset by 1 since null values are 0
+      par↩∾˘(↕≠par) {«⍟𝕨 𝕩} ˘par                        # shift diagonal zeros to vertical line
 
-    n↩(<2)‿(<2)/par
-    n↩0<{«𝕩∧2|↕≠𝕩}˘0¨⌾((2|↕≠n)⊸/) n                   # nodes by finding every second level then every second item within the level
+      i←@ 
+      i↩{ (1+𝕩/m/↕≠p)⌾(𝕩⊸/) 𝕩 }˘m⊸/˘d=⌜˜↕⌈´d+1          # depth matrix to parent vector offset by 1 since null values are 0
+      i↩∾˘(↕≠i) {«⍟𝕨 𝕩} ˘i                        # shift diagonal zeros to vertical line
 
-    h↩(<2)‿(<2)/par⌈+`˘s-e                            # extend parents to horizontal with expanded padding
-    h↩h∧¬{𝕩>«𝕩}˘h                                     # remove overflow hendings (ie o- nodes)
-    h↩«0¨⌾((2|↕≠h)⊸/) h                               # bars on every second level and shift up
-    h↩type.horz×0⊸< h                                 # set base type for bars
-    h↩h⌈(type.start×>⟜»˘h)+(type.end×>⟜«˘h)           # find start and end bars
-    h↩h⌈type.mid×«n                                   # find mid bars that have children
-    h↩h⌊type.vert                                     # clamp to vertical bar if both start and end
+      s←×⟜∊˘par×>⟜»˘par ⋄ e←×⟜{⌽∊⌽𝕩}˘ par×>⟜«˘par       # mark start and ends of parent horizontals
 
-    {•Out ⊢◶" ○─┬├┐│"¨𝕩}˘h⌈n                          # convert ids to characters and print
-  }¨⍷r
+      n↩(<2)‿(<2)/i
+      n↩ {«𝕩∧2|↕≠𝕩}˘0¨⌾((2|↕≠n)⊸/) n
+      n↩ {(vert⊸+)⌾((0<𝕩)⊸/)𝕩}˘n # consider ch to be anything over vert
+
+      h↩(<2)‿(<2)/par⌈+`˘s-e                            # extend parents to horizontal with expanded padding
+      h↩h∧¬{𝕩>«𝕩}˘h                                     # remove overflow hendings (ie o- nodes)
+      h↩«0¨⌾((2|↕≠h)⊸/) h                               # bars on every second level and shift up
+      h↩horz×0⊸< h                                 # set base for bars
+      h↩h⌈(start×>⟜»˘h)+(end×>⟜«˘h)           # find start and end bars
+      h↩h⌈mid×«n                                   # find mid bars that have children
+      h↩h⌊vert                                     # clamp to vertical bar if both start and end
+
+      {•Out ⊢◶(" ─┬├┐│"∾ch)¨𝕩}˘h⌈n                          # convert ids to characters and print
+    }¨⍷r
 }
