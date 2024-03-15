@@ -15,9 +15,8 @@ _Fix   ← {𝔽∘⊢⍟≢⟜𝔽_𝕣∘⊢⍟≢⟜𝔽𝕩}
 Draw ⇐ {
     𝕊 𝕩: ((≠𝕩)⥊'○') 𝕊 𝕩;
   𝕨 𝕊 𝕩:
-    ch←𝕨 ⋄ p←𝕩 ⋄ r←{𝕩⊏p} _fix p ⋄ d←Depth 𝕩                    # r: roots. d: depth
-    •Show ch
-    •Show p
+    ch ← •Type◶⟨⊢,(0⊸⊑)∘•Fmt, ⊢⟩¨𝕨 
+    ⋄ p←𝕩 ⋄ r←{𝕩⊏p} _fix p ⋄ d←Depth 𝕩                    # r: roots. d: depth
     {
       par←@ ⋄ h←@ ⋄ n←@ ⋄ m←𝕩=r                         # init empty variables for hacking convience and mask for current root
       par↩{ (1+𝕩/m/p)⌾(𝕩⊸/) 𝕩 }˘m⊸/˘d=⌜˜↕⌈´d+1          # depth matrix to parent vector offset by 1 since null values are 0

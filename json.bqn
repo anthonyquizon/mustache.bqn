@@ -4,12 +4,12 @@
 # - all values are strings
 # - trailing commas are allowed
 
-⟨Parent, Delete⟩ ← •Import "tree.bqn" 
+⟨Parent, Delete, Draw⟩ ← •Import "tree.bqn" 
 
 
 ⟨
   none,str,col,com,curl_opn,curl_cls,sqr_opn,sqr_cls,quote,      # characters
-  key,val,obj,arr                                                # nodes
+  key,val,obj,arr,                                                # nodes
 ⟩←↕13
 
 # TODO validation with line/col numbers
@@ -22,6 +22,14 @@ Compile ⇐ {
     { o←(t=curl_opn)∨t=sqr_opn ⋄ c←(t=curl_cls)∨t=sqr_cls ⋄ p↩ Parent +`o-c }                                    # parse parents of brackets (ch no longer needed after tokenizing processes)
     { m←t=col ⋄ s←t=str ⋄ t↩(¬m)/key¨⌾((s∧«m)⊸/)t ⋄ r (¬m)⊸/↩ ⋄ p↩(¬m) Delete p }                                  # parse keys
     { m←(t≠curl_cls)∧(t≠sqr_cls)∧(t≠com) ⋄ t m⊸/↩ ⋄ r m⊸/↩ ⋄ p↩m Delete p }                                       # remove unneeded nodes - closing backets and commas
+    { m←t=curl_opn ⋄ t↩t⌈m×obj }                                                                              # mark objects 
+    { m←t=sqr_opn ⋄ t↩t⌈m×arr }                                                                              # mark arrays 
+    { m←t=str ⋄ t↩t⌈m×val }                                                                              # mark vars 
     { m←»t=key ⋄ p (m/»↕≠p)⌾(m⊸/) ↩ }                                                                              # move object values parent to keys   
+    •Show t
+    (⊢◶" s       kvoa"¨ t) Draw p
+    #t Draw p
+    #Draw p
+    # TODO do not export t
     { ptr⇐ [p, t, r] ⋄  names ⇐ n }
 }

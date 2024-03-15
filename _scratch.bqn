@@ -21,6 +21,5 @@ z← Compile "
 
 "
 [p,t,r] ←z.ptr
-"abcdefghijlk" Draw p
 
 
