@@ -14,12 +14,13 @@ z← Compile "
   foo: [{
     bar: 1 
   },{
-    bar: 2
+    bar: 2,
+    baz: 2
   }]
 }
 
 "
 [p,t,r] ←z.ptr
-"abcdefghi" Draw p
+"abcdefghijlk" Draw p
 
 

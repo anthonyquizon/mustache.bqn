@@ -22,12 +22,12 @@ Draw ⇐ {
       par←@ ⋄ h←@ ⋄ n←@ ⋄ m←𝕩=r                         # init empty variables for hacking convience and mask for current root
       par↩{ (1+𝕩/m/p)⌾(𝕩⊸/) 𝕩 }˘m⊸/˘d=⌜˜↕⌈´d+1          # depth matrix to parent vector offset by 1 since null values are 0
       par↩∾˘(↕≠par) {«⍟𝕨 𝕩} ˘par                        # shift diagonal zeros to vertical line
+      s←×⟜∊˘par×>⟜»˘par ⋄ e←×⟜{⌽∊⌽𝕩}˘ par×>⟜«˘par       # mark start and ends of parent horizontals
 
       i←@ 
       i↩{ (1+𝕩/m/↕≠p)⌾(𝕩⊸/) 𝕩 }˘m⊸/˘d=⌜˜↕⌈´d+1          # depth matrix to parent vector offset by 1 since null values are 0
       i↩∾˘(↕≠i) {«⍟𝕨 𝕩} ˘i                        # shift diagonal zeros to vertical line
 
-      s←×⟜∊˘par×>⟜»˘par ⋄ e←×⟜{⌽∊⌽𝕩}˘ par×>⟜«˘par       # mark start and ends of parent horizontals
 
       n↩(<2)‿(<2)/i
       n↩ {«𝕩∧2|↕≠𝕩}˘0¨⌾((2|↕≠n)⊸/) n
@@ -38,9 +38,37 @@ Draw ⇐ {
       h↩«0¨⌾((2|↕≠h)⊸/) h                               # bars on every second level and shift up
       h↩horz×0⊸< h                                 # set base for bars
       h↩h⌈(start×>⟜»˘h)+(end×>⟜«˘h)           # find start and end bars
-      h↩h⌈mid×«n                                   # find mid bars that have children
+      h↩h⌈mid×«0<n                                   # find mid bars that have children
       h↩h⌊vert                                     # clamp to vertical bar if both start and end
 
       {•Out ⊢◶(" ─┬├┐│"∾ch)¨𝕩}˘h⌈n                          # convert ids to characters and print
     }¨⍷r
 }
+
+#⟨none, node, horz, mid, start, end, vert⟩ ← ↕7
+
+#Draw ⇐ {
+    #𝕊 𝕩: ((≠𝕩)⥊'○') 𝕊 𝕩;
+  #𝕨 𝕊 𝕩:
+    #ch←𝕨 ⋄ p←𝕩 ⋄ r←{𝕩⊏p} _fix p ⋄ d←Depth 𝕩                    # r: roots. d: depth
+    #•Show ch
+    #•Show p
+    #{
+        #par←@ ⋄ h←@ ⋄ n←@ ⋄ m←𝕩=r                         # init empty variables for hacking convience and mask for current root
+    #par↩{ (1+𝕩/m/p)⌾(𝕩⊸/) 𝕩 }˘m⊸/˘d=⌜˜↕⌈´d+1          # depth matrix to parent vector offset by 1 since null values are 0
+    #par↩∾˘(↕≠par) {«⍟𝕨 𝕩} ˘par                        # shift diagonal zeros to vertical line
+    #s←×⟜∊˘par×>⟜»˘par ⋄ e←×⟜{⌽∊⌽𝕩}˘ par×>⟜«˘par       # mark start and ends of parent horizontals
+
+    #n↩(<2)‿(<2)/par
+    #n↩0<{«𝕩∧2|↕≠𝕩}˘0¨⌾((2|↕≠n)⊸/) n                   # nodes by finding every second level then every second item within the level
+
+    #h↩(<2)‿(<2)/par⌈+`˘s-e                            # extend parents to horizontal with expanded padding
+    #h↩h∧¬{𝕩>«𝕩}˘h                                     # remove overflow hendings (ie o- nodes)
+    #h↩«0¨⌾((2|↕≠h)⊸/) h                               # bars on every second level and shift up
+    #h↩horz×0⊸< h                                 # set base for bars
+    #h↩h⌈(start×>⟜»˘h)+(end×>⟜«˘h)           # find start and end bars
+    #h↩h⌈mid×«n                                   # find mid bars that have children
+    #h↩h⌊vert
+    #{•Out ⊢◶" ○─┬├┐│"¨𝕩}˘h⌈n
+    #}¨⍷r
+#}
