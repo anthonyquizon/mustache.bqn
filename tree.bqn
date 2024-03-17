@@ -5,6 +5,13 @@ Leaf   ⇐ { ¬(↕≠𝕩)⍷𝕩 }
 Depth  ⇐ { p←𝕩 ⋄ d←p≠(↕≠p) ⋄ { z←𝕩⊏p ⋄ d+↩z≠𝕩 ⋄ z } _Fix p ⋄ d } 
 _Fix   ← {𝔽∘⊢⍟≢⟜𝔽_𝕣∘⊢⍟≢⟜𝔽𝕩}
 
+# convert namespace to parent vector
+
+#Ns ← {
+  #𝕊 𝕩 : 6≡•Type 𝕩 ? 
+    #¨ •ns.Keys 𝕩
+#}
+
 # example:
 # ○
 # ├─┬─┐
@@ -44,30 +51,18 @@ Draw ⇐ {
     }¨⍷r
 }
 
-#⟨none, node, horz, mid, start, end, vert⟩ ← ↕7
-
-#Draw ⇐ {
-    #𝕊 𝕩: ((≠𝕩)⥊'○') 𝕊 𝕩;
-  #𝕨 𝕊 𝕩:
-    #ch←𝕨 ⋄ p←𝕩 ⋄ r←{𝕩⊏p} _fix p ⋄ d←Depth 𝕩                    # r: roots. d: depth
-    #•Show ch
-    #•Show p
-    #{
-        #par←@ ⋄ h←@ ⋄ n←@ ⋄ m←𝕩=r                         # init empty variables for hacking convience and mask for current root
-    #par↩{ (1+𝕩/m/p)⌾(𝕩⊸/) 𝕩 }˘m⊸/˘d=⌜˜↕⌈´d+1          # depth matrix to parent vector offset by 1 since null values are 0
-    #par↩∾˘(↕≠par) {«⍟𝕨 𝕩} ˘par                        # shift diagonal zeros to vertical line
-    #s←×⟜∊˘par×>⟜»˘par ⋄ e←×⟜{⌽∊⌽𝕩}˘ par×>⟜«˘par       # mark start and ends of parent horizontals
-
-    #n↩(<2)‿(<2)/par
-    #n↩0<{«𝕩∧2|↕≠𝕩}˘0¨⌾((2|↕≠n)⊸/) n                   # nodes by finding every second level then every second item within the level
-
-    #h↩(<2)‿(<2)/par⌈+`˘s-e                            # extend parents to horizontal with expanded padding
-    #h↩h∧¬{𝕩>«𝕩}˘h                                     # remove overflow hendings (ie o- nodes)
-    #h↩«0¨⌾((2|↕≠h)⊸/) h                               # bars on every second level and shift up
-    #h↩horz×0⊸< h                                 # set base for bars
-    #h↩h⌈(start×>⟜»˘h)+(end×>⟜«˘h)           # find start and end bars
-    #h↩h⌈mid×«n                                   # find mid bars that have children
-    #h↩h⌊vert
-    #{•Out ⊢◶" ○─┬├┐│"¨𝕩}˘h⌈n
-    #}¨⍷r
-#}
+# parse namespaces and to parent tree
+ParseNs ← {
+     𝕊 𝕩 :  
+       ⟨s,d,t⟩ ← 0 𝕊 𝕩 
+       m←0⊸=∘≠¨s ⋄ p←(Parent d) ⋄ r←(↕(≠s)-(≠/m))⌾((¬m)⊸/) (≠s)⥊¯1 ⋄ n← s↩(¬m)/s
+       {ptr⇐[p,t,r], n⇐n}
+  ;d 𝕊 ns : 6≡•Type ns ? 
+    children←∾¨´{ ⟨⟨𝕩⟩, (d+1), ⟨'k'⟩⟩ ∾¨ (d+2) ParseNs (ns •ns.Get 𝕩) } ¨•ns.Keys ns
+    ⟨⟨""⟩, ⟨d⟩, ⟨'o'⟩⟩ ∾¨ children 
+  ;d 𝕊 𝕩 : 0≡•Type 𝕩 ? 
+    { 𝕊 s : ∧´2⊸≡∘•Type¨s ? ⟨⟨s⟩, ⟨d⟩, ⟨'v'⟩⟩ ; # parse string
+      𝕊 𝕩 : ∾¨´{ (d) ParseNs 𝕩}¨𝕩 
+    } 𝕩
+  ;𝕨 𝕊 𝕩 : 1≡•Type 𝕩 ? 𝕨 𝕊 •Fmt 𝕩
+}

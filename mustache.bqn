@@ -6,21 +6,41 @@
 ⟨ none, opn_bkt, cls_bkt, hash, slash, str,     # characters
   opn_dm, cls_dm,                               # markers
   tag, opn, cls, var                            # tags
+
+  # mark as 
 ⟩ ← ↕12
+
+labels ⇐ "f    s  tocv"
 
 # TODO use _while_
 _Fix ← {𝔽∘⊢⍟≢⟜𝔽_𝕣∘⊢⍟≢⟜𝔽𝕩}
 
 Delete ← { (/𝕨)(⊢-⍋)(¬𝕨)/𝕩 }
-Parent ⇐ { g←⊔¯1⌽𝕩 ⋄ (↕≠𝕩) {a‿w←𝕨 ⋄ (⊏⟜a 1-˜a⍋w)⌾(w⊸⊏) 𝕩 }´ (1↓(»g){𝕨‿𝕩}¨g) }
+Parent ⇐ { g←⊔𝕩 ⋄ (↕≠𝕩) {a‿w←𝕨 ⋄ (⊏⟜a 1-˜a⍋w)⌾(w⊸⊏) 𝕩 }´ (1↓(»g){𝕨‿𝕩}¨g) }
 Depth  ← { p←𝕩 ⋄ d←p≠(↕≠p) ⋄ { z←𝕩⊏p ⋄ d+↩z≠𝕩 ⋄ z } _Fix p ⋄ d } 
 Leaf   ⇐ { ¬(↕≠𝕩)⍷𝕩 }
 
 ⟨Draw⟩ ← •Import "tree.bqn" 
-json ← •Import "./json.bqn"
+
+# parse namespaces and to parent tree
+ParseNs ← {
+     𝕊 𝕩 :  
+       ⟨s,d,t⟩ ← 0 𝕊 𝕩 
+       m←0⊸=∘≠¨s ⋄ p←(Parent d) ⋄ r←(↕(≠s)-(≠/m))⌾((¬m)⊸/) (≠s)⥊¯1 ⋄ n← s↩(¬m)/s
+       {ptr⇐[p,t,r], n⇐n}
+  ;d 𝕊 ns : 6≡•Type ns ? 
+    children←∾¨´{ ⟨⟨𝕩⟩, (d+1), ⟨'k'⟩⟩ ∾¨ (d+2) ParseNs (ns •ns.Get 𝕩) } ¨•ns.Keys ns
+    ⟨⟨""⟩, ⟨d⟩, ⟨'o'⟩⟩ ∾¨ children 
+  ;d 𝕊 𝕩 : 0≡•Type 𝕩 ? 
+    { 𝕊 s : ∧´2⊸≡∘•Type¨s ? ⟨⟨s⟩, ⟨d⟩, ⟨'v'⟩⟩ ; # parse string
+      𝕊 𝕩 : ∾¨´{ (d) ParseNs 𝕩}¨𝕩 
+    } 𝕩
+  ;𝕨 𝕊 𝕩 : 1≡•Type 𝕩 ? 𝕨 𝕊 •Fmt 𝕩
+}
+
 #TODO line number info
-Compile ← {
-  [ip,it,ir]←𝕨.ptr ⋄ rn←𝕨.names ⋄ ch←𝕩 ⋄ t←@ ⋄ r←@ ⋄ n←@ ⋄ p←@
+Parse ⇐ {
+  [ip,it,ir]←𝕨.ptr ⋄ rn←𝕨.n ⋄ ch←𝕩 ⋄ t←@ ⋄ r←@ ⋄ n←@ ⋄ p←@
 
   { t↩ ∨´⟨opn_bkt,cls_bkt,hash,slash⟩×ch⊸=¨"{}#/" }                                    # tokenize character types
   { m←t=opn_bkt ⋄ q←opn_dm×>⟜«m ⋄ z←(¬m)∨0<q ⋄ t↩z/t⌈q ⋄ ch↩z/ch }                     # find double opn brackets then collapse and mark into a delimeter
@@ -33,6 +53,8 @@ Compile ← {
     z←(0<t)∨(0<s) ⋄ t↩ z/t⌈s×str ⋄ n↩ ⊏⟜ch¨1↓⊔m∧+`s ⋄ r↩ (↕≠n)⌾((t=str)⊸/) (≠t)⥊¯1
   }
 
+  # TODO multiple sources
+
   # find tags - delete open and close and lead with tag flag
   { o←t=opn_dm ⋄ c←t=cls_dm ⋄ z←¬c ⋄ t↩z/t⌈o×tag ⋄ r↩z/r }
   # mark opn tags - consume {# and set str as id (»»)
@@ -43,20 +65,36 @@ Compile ← {
   { m←(t=tag)∧(«t=str) ⋄ z←¬m ⋄ t↩z/t⌈»m×var ⋄ r↩z/r }
   #TODO mark vars tags
   # create parent vector
-  { o←t=opn ⋄ c←t=cls ⋄ p↩Parent d←+`o-c }
-  •Show [p,t, r]
-  { m←(t=cls) ⋄ z←¬m ⋄ p↩m Delete p ⋄ t↩z/t ⋄ r↩z/r  } # remove cls tags since we dont need them anymore
-
-  # match input tree to parent tree
+  #{ o←t=opn ⋄ c←t=cls ⋄ p↩Parent d←+`o-c }
+  •Show t
+  { o←t=opn ⋄ c←t=cls ⋄ p↩Parent d←»+`o-c }
   { 
-    m←(t=opn)∨(t=cls)∨(t=var) 
-    Draw  (¬m) Delete p
-    Draw ip
-  }
-  #•Show [p,t]
-  #Draw p
-  #Draw ip
+    m←(t=cls) ⋄ z←¬m 
+    ⋄ p↩m Delete p ⋄ t↩z/t ⋄ r↩z/r ⋄ n↩z/n
+
+  } 
+
+  { ptr⇐ [p, ⊢◶labels¨t, r] ⋄  names ⇐ n }
 }
+
+Compile ⇐ {
+  ⟨[tp,tt,tr]⇐ptr,tn⇐names⟩←𝕨 ⋄ ⟨[dp,dt,dr]⇐ptr,dn⇐names⟩←𝕩
+
+  td← Depth tp
+  •Show tr
+
+  dv ← ((dt='k')/dr)⊏dn
+  tv← (((tt='v')∨(tt='o'))/tr)⊏tn # variable names
+
+  dt Draw dp
+  # TODO check existence by depth
+  •Show dv‿tv
+  •Show dv∊tv
+  # create key tree
+  #dt Draw dp
+}
+
+
 
 #Compile0 ← {
   ## ip: replace parent, rv: replace values, r: references, t: types, p: parent, ch: characters, n: names
@@ -91,15 +129,3 @@ Compile ← {
 
   #Print @
 #}
-
-
-data ← json.Compile "
-   {
-      each: [ foo: 111, bar: 222 ]
-   }
-"
-
-•Show data.ptr‿data.names
-
-data Compile (•file.Chars "test.mustache")
-
