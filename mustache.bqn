@@ -5,12 +5,12 @@
 # types
 ⟨ none, opn_bkt, cls_bkt, hash, slash, str,     # characters
   opn_dm, cls_dm,                               # markers
-  tag, opn, cls, var                            # tags
+  tag, opn, cls, key                            # tags
 
   # mark as 
 ⟩ ← ↕12
 
-labels ⇐ "f    s  tocv"
+labels ⇐ "f    s  tock"
 
 # TODO use _while_
 _Fix ← {𝔽∘⊢⍟≢⟜𝔽_𝕣∘⊢⍟≢⟜𝔽𝕩}
@@ -23,24 +23,24 @@ Leaf   ⇐ { ¬(↕≠𝕩)⍷𝕩 }
 ⟨Draw⟩ ← •Import "tree.bqn" 
 
 # parse namespaces and to parent tree
-ParseNs ← {
-     𝕊 𝕩 :  
+ParseNs ⇐ {
+    𝕊 𝕩 :  
        ⟨s,d,t⟩ ← 0 𝕊 𝕩 
        m←0⊸=∘≠¨s ⋄ p←(Parent d) ⋄ r←(↕(≠s)-(≠/m))⌾((¬m)⊸/) (≠s)⥊¯1 ⋄ n← s↩(¬m)/s
-       {ptr⇐[p,t,r], n⇐n}
-  ;d 𝕊 ns : 6≡•Type ns ? 
+       {ptr⇐[p,t,r], n⇐n};
+  d 𝕊 ns : 6≡•Type ns ? 
     children←∾¨´{ ⟨⟨𝕩⟩, (d+1), ⟨'k'⟩⟩ ∾¨ (d+2) ParseNs (ns •ns.Get 𝕩) } ¨•ns.Keys ns
-    ⟨⟨""⟩, ⟨d⟩, ⟨'o'⟩⟩ ∾¨ children 
-  ;d 𝕊 𝕩 : 0≡•Type 𝕩 ? 
+    ⟨⟨""⟩, ⟨d⟩, ⟨'o'⟩⟩ ∾¨ children;
+  d 𝕊 𝕩 : 0≡•Type 𝕩 ?
     { 𝕊 s : ∧´2⊸≡∘•Type¨s ? ⟨⟨s⟩, ⟨d⟩, ⟨'v'⟩⟩ ; # parse string
       𝕊 𝕩 : ∾¨´{ (d) ParseNs 𝕩}¨𝕩 
-    } 𝕩
-  ;𝕨 𝕊 𝕩 : 1≡•Type 𝕩 ? 𝕨 𝕊 •Fmt 𝕩
+    } 𝕩;
+  𝕨 𝕊 𝕩 : 1≡•Type 𝕩 ? 𝕨 𝕊 •Fmt 𝕩
 }
 
-#TODO line number info
+
 Parse ⇐ {
-  [ip,it,ir]←𝕨.ptr ⋄ rn←𝕨.n ⋄ ch←𝕩 ⋄ t←@ ⋄ r←@ ⋄ n←@ ⋄ p←@
+  ch←𝕩 ⋄ t←@ ⋄ r←@ ⋄ n←@ ⋄ p←@
 
   { t↩ ∨´⟨opn_bkt,cls_bkt,hash,slash⟩×ch⊸=¨"{}#/" }                                    # tokenize character types
   { m←t=opn_bkt ⋄ q←opn_dm×>⟜«m ⋄ z←(¬m)∨0<q ⋄ t↩z/t⌈q ⋄ ch↩z/ch }                     # find double opn brackets then collapse and mark into a delimeter
@@ -62,36 +62,47 @@ Parse ⇐ {
   # mark cls tags - consume {/ and set str as id (»»)
   { m←(t=tag)∧(«t=slash)∧(««t=str) ⋄ z←¬∨⟜»m ⋄ t↩z/t⌈»»m×cls ⋄ r↩z/r }
   # mark cls tags - consume { and set str as id (»)
-  { m←(t=tag)∧(«t=str) ⋄ z←¬m ⋄ t↩z/t⌈»m×var ⋄ r↩z/r }
-  #TODO mark vars tags
+  { m←(t=tag)∧(«t=str) ⋄ z←¬m ⋄ t↩z/t⌈(»m)×key ⋄ r↩z/r }
   # create parent vector
-  #{ o←t=opn ⋄ c←t=cls ⋄ p↩Parent d←+`o-c }
-  •Show t
   { o←t=opn ⋄ c←t=cls ⋄ p↩Parent d←»+`o-c }
-  { 
-    m←(t=cls) ⋄ z←¬m 
-    ⋄ p↩m Delete p ⋄ t↩z/t ⋄ r↩z/r ⋄ n↩z/n
+  # mark opn tags as keys
+  { m←(t=opn) ⋄ t↩t⌈m×key }
 
-  } 
 
-  { ptr⇐ [p, ⊢◶labels¨t, r] ⋄  names ⇐ n }
+  #Delete cls tags with unused names and shift r
+  { m←(t=cls) ⋄ z←¬m ⋄ p↩m Delete p ⋄ t↩z/t ⋄ r↩ z/r-+`¬z ⋄ n↩ z/n } 
+
+  { ptr⇐ [p, ⊢◶labels¨t, r] ⋄  n ⇐ n }
 }
 
 Compile ⇐ {
-  ⟨[tp,tt,tr]⇐ptr,tn⇐names⟩←𝕨 ⋄ ⟨[dp,dt,dr]⇐ptr,dn⇐names⟩←𝕩
+   𝕨 𝕊 𝕩 : (¬𝕩 •ns.Has "ptr")∧6≡•Type 𝕩 ? 𝕨 𝕊 (ParseNs 𝕩);
+   𝕨 𝕊 𝕩 : 
+    ⟨[tp,tt,tr]⇐ptr,tn⇐n⟩←𝕨 ⋄ ⟨[dp,dt,dr]⇐ptr,dn⇐n⟩←𝕩
 
-  td← Depth tp
-  •Show tr
+    tt Draw tp
+    dt Draw dp
+    •Show (((dt='k')/dr)⊏dn)
+    •Show (((tt='k')/tr)⊏tn)
+    •Show (((dt='k')/dr)⊏dn)∊((tt='k')/tr)⊏tn
+    #{
+      #m← dt='k'
 
-  dv ← ((dt='k')/dr)⊏dn
-  tv← (((tt='v')∨(tt='o'))/tr)⊏tn # variable names
+      #dt Draw dp
+      #(m/dt) Draw m/dp⊏dp
+    #}
+    #td← Depth tp
+    #•Show tr
 
-  dt Draw dp
-  # TODO check existence by depth
-  •Show dv‿tv
-  •Show dv∊tv
-  # create key tree
-  #dt Draw dp
+    #dv ← ((dt='k')/dr)⊏dn
+    #tv← (((tt='v')∨(tt='o'))/tr)⊏tn # variable names
+
+    #dt Draw dp
+    ## TODO check existence by depth
+    #•Show dv‿tv
+    #•Show dv∊tv
+    # create key tree
+    #dt Draw dp
 }
 
 
