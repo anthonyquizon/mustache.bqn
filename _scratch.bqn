@@ -7,9 +7,12 @@ mustache ← •Import "mustache.bqn"
 
 a ← {
   peach⇐⟨
-    {foo⇐333, bar⇐444}
+    {foo⇐333, bar⇐⟨{baz⇐444}, {baz⇐555}⟩}
   ⟩,
   each⇐⟨
+    {foo⇐111, bar⇐222}
+  ⟩,
+  bleach⇐⟨
     {foo⇐111, bar⇐222}
   ⟩,
 }

@@ -80,11 +80,32 @@ Compile ⇐ {
    𝕨 𝕊 𝕩 : 
     ⟨[tp,tt,tr]⇐ptr,tn⇐n⟩←𝕨 ⋄ ⟨[dp,dt,dr]⇐ptr,dn⇐n⟩←𝕩
 
-    tt Draw tp
+    #data key parent vector
+    dkp ← @
+
+    #tt Draw tp
     dt Draw dp
-    •Show (((dt='k')/dr)⊏dn)
-    •Show (((tt='k')/tr)⊏tn)
-    •Show (((dt='k')/dr)⊏dn)∊((tt='k')/tr)⊏tn
+
+     # create data parent vector of only keys
+     {
+      m←(dt='k')∧(dp=0)
+      dkp↩  (/m)⌾(m⊸/) dp # set roots of keys
+      dkp↩{𝕩⊏dkp⊏dkp}⌾((dt='k')⊸/) dkp # remap key parents to keys
+      dkp↩ ((dt='o') ∨ (dt='v')) Delete dkp #delete objs and keys
+     }
+
+    #•Show m←dt='k'
+    #•Show m←dt='v'
+    #•Show m/dt
+    #(m/dt) Draw m Delete dp⊏dp
+
+    #{ d← Depth dp ⋄ •Show d=⌜˜↕⌈´d+1 }
+    #{ d← Depth tp ⋄ •Show d=⌜˜↕⌈´d+1 }
+
+    #•Show (((dt='k')/dr)⊏dn)
+    #•Show (((tt='k')/tr)⊏tn)
+    #•Show (((dt='k')/dr)⊏dn)∊((tt='k')/tr)⊏tn
+
     #{
       #m← dt='k'
 

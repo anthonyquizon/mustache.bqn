@@ -4,6 +4,10 @@
     {{/each}}
 
     {{#peach}}
-        <a>{{bar}}</a>
+        <a>
+            {{#bar}}
+                {{baz}}
+            {{/bar}}
+        </a>
     {{/peach}}
 </div>
