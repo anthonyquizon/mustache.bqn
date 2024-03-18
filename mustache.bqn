@@ -107,16 +107,26 @@ Compile ⇐ {
       
       dkp↩ ((dt='o') ∨ (dt='v')) Delete dkp #delete objs and keys
 
-
-      •Show (((dt='k')/dr)⊏dn) 
       dkr↩(dt='k')/dr
-     (0⊑¨((dt='k')/dr)⊏dn) Draw dkp
-      
      }
 
      # create template parent vector of only keys
     tkp ↩ (tt≠'k') Delete tp
     tkr ↩ (tt='k') / tr
+
+    # set data key indices to match template indices and remove any non existing keys
+    {
+      z←(tkr⊏tn)⊐(dkr⊏dn)
+      z↩⊏⟜tkr⌾(((≠tkr)≠z)⊸/) z
+      m←(≠tkr)=z
+
+      dkp↩m Delete dkp
+      dkr↩(¬m)/z
+
+      Draw dkp
+    }
+
+
 
     #•Show tn
     #•Show ⍋tkr⊏tn
