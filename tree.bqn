@@ -49,6 +49,8 @@ Draw ⇐ {
 
       {•Out ⊢◶(" ─┬├┐│"∾ch)¨𝕩}˘h⌈n                          # convert ids to characters and print
     }¨⍷r
+
+    •Out "---"
 }
 
 # parse namespaces and to parent tree
