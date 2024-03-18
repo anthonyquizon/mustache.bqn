@@ -26,7 +26,13 @@ Leaf   ⇐ { ¬(↕≠𝕩)⍷𝕩 }
 ParseNs ⇐ {
     𝕊 𝕩 :  
        ⟨s,d,t⟩ ← 0 𝕊 𝕩 
-       m←0⊸=∘≠¨s ⋄ p←(Parent d) ⋄ r←(↕(≠s)-(≠/m))⌾((¬m)⊸/) (≠s)⥊¯1 ⋄ n← s↩(¬m)/s
+       m←0⊸=∘≠¨s ⋄ p←(Parent d) 
+       # remove empty strings
+       r←(↕(≠s)-(≠/m))⌾((¬m)⊸/) (≠s)⥊¯1 ⋄ n← s↩(¬m)/s
+       # remove duplicate strings
+       r↩(⊐n)⌾((0≤r)⊸/) r
+       n↩ ⍷n 
+
        {ptr⇐[p,t,r], n⇐n};
   d 𝕊 ns : 6≡•Type ns ? 
     children←∾¨´{ ⟨⟨𝕩⟩, (d+1), ⟨'k'⟩⟩ ∾¨ (d+2) ParseNs (ns •ns.Get 𝕩) } ¨•ns.Keys ns
@@ -68,15 +74,21 @@ Parse ⇐ {
   # mark opn tags as keys
   { m←(t=opn) ⋄ t↩t⌈m×key }
 
+  # TODO unique names
 
   #Delete cls tags with unused names and shift r
   { m←(t=cls) ⋄ z←¬m ⋄ p↩m Delete p ⋄ t↩z/t ⋄ r↩ z/r-+`¬z ⋄ n↩ z/n } 
+
+
+  # remove duplicate strings
+   r↩(⊐n)⌾((0≤r)⊸/) r
+  n↩ ⍷n
 
   { ptr⇐ [p, ⊢◶labels¨t, r] ⋄  n ⇐ n }
 }
 
 Compile ⇐ {
-   𝕨 𝕊 𝕩 : (¬𝕩 •ns.Has "ptr")∧6≡•Type 𝕩 ? 𝕨 𝕊 (ParseNs 𝕩);
+   𝕨 𝕊 𝕩 : (¬𝕩 •ns.Has "ptr") ? 𝕨 𝕊 (ParseNs 𝕩);
    𝕨 𝕊 𝕩 : 
     ⟨[tp,tt,tr]⇐ptr,tn⇐n⟩←𝕨 ⋄ ⟨[dp,dt,dr]⇐ptr,dn⇐n⟩←𝕩
 
@@ -97,6 +109,7 @@ Compile ⇐ {
 
 
       •Show (((dt='k')/dr)⊏dn) 
+      dkr↩(dt='k')/dr
      (0⊑¨((dt='k')/dr)⊏dn) Draw dkp
       
      }
@@ -104,6 +117,16 @@ Compile ⇐ {
      # create template parent vector of only keys
     tkp ↩ (tt≠'k') Delete tp
     tkr ↩ (tt='k') / tr
+
+    #•Show tn
+    #•Show ⍋tkr⊏tn
+    #•Show dkr⊏dn
+    #{
+      #d←Depth dkp
+      #•Show dkr
+      #dm←d=⌜˜↕⌈´d+1 
+      #•Show {(≠d)↑𝕩/dkr}˘dm
+    #}
     #(0⊸⊏¨tkr) Draw tkp
     #({0⊑𝕩⊑tn}¨tkr)  Draw tkp
 

@@ -1,4 +1,4 @@
-
+•Show "---"
 # delete leaf nodes - match to parent tree
 
 ⟨Draw⟩ ← •Import "tree.bqn" 
@@ -17,6 +17,7 @@ a ← {
   ⟩,
 }
 
+#mustache.ParseNs a
 tpl ← mustache.Parse (•file.Chars "test.mustache")
 tpl mustache.Compile a
 
