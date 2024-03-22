@@ -92,28 +92,27 @@ Compile ⇐ {
    𝕨 𝕊 𝕩 : 
     ⟨[tp,tt,tr]⇐ptr,tn⇐n⟩←𝕨 ⋄ ⟨[dp,dt,dr]⇐ptr,dn⇐n⟩←𝕩
 
-    #data key parent vector
-    dkp ← @ ⋄ dkr ← @
+    #data key parent vector. dki -> original indices
+    dkp ← @ ⋄ dkr ← @ ⋄ dki ← @ 
     #template key parent vector
-    tkp ← @ ⋄ tkr ← @ 
+    tkp ← @ ⋄ tkr ← @ ⋄ tki ← @
 
 
      # create data parent vector of only keys
      {
       m←(dt='k')∧(dp=0)
-      dkp↩  (/m)⌾(m⊸/) dp # set roots of keys
-
+      dkp↩(/m)⌾(m⊸/) dp # set roots of keys
       dkp↩{𝕩⊏dkp}⌾((dt='k')⊸/) dkp # remap key parents to keys
-      
-      dkp↩ ((dt='o') ∨ (dt='v')) Delete dkp #delete objs and keys
+      dkp↩((dt='o') ∨ (dt='v')) Delete dkp #delete objs and values
 
       dkr↩(dt='k')/dr
-
+      dki↩(dt='k')/↕≠dt
      }
 
      # create template parent vector of only keys
     tkp ↩ (tt≠'k') Delete tp
     tkr ↩ (tt='k') / tr
+    tki ↩ (tt='k') / ↕≠tr
 
     # set data key indices to match template indices and remove any non existing keys
     {
@@ -123,63 +122,130 @@ Compile ⇐ {
       z←(≠tkr)=e ⋄ { z↩z∨(𝕩⊏z) ⋄ 𝕩⊏dkp} _fix dkp
       # map references to names that do exist to matching template references
       m←⊏⟜tkr⌾(((≠tkr)≠e)⊸/) e
-
       # delete all references that do not have a name variable in template
-
       # delete all children of parents of non existing vars
-      #•Show dkp≍z
-      #•Show (∾1↑¨dkr⊏dn)
-
-      #•Show [↕≠dkp, dkp,z, (∾1↑¨dkr⊏dn)]
-      #(∾1↑¨dkr⊏dn) Draw dkp
       dkp↩z Delete dkp
-      #•Show dkp
-      
-      #•Show dkp
-      #•Show (/z)
-      #dkp↩z Delete dkp
       dkr↩(¬z)/m
-
-      #•Show dkp
-      (∾1↑¨dkr⊏tn) Draw dkp
+      dki↩(¬z)/dki
     }
-
-
-      #(∾1↑¨tkr⊏tn) Draw tkp
-
-
-    #•Show tn
-    #•Show ⍋tkr⊏tn
-    #•Show dkr⊏dn
 
     # extract valid paths
-    PathMat ←{
-      d←Depth 𝕩
-      dm←d=⌜˜↕⌈´d+1 
-      dm↩ ⌈`˘⍉+`˘⍉(↕≠𝕨)⊸×˘dm
-      ⊏⟜𝕨˘dm
-    }
-    #•Show dpm ← dkr PathMat dkp
-    #•Show tpm ← tkr PathMat tkp
-
-
-    #•Show (<˘⍉dpm)
-    #•Show <˘⍉tpm
-    #•Show (<˘⍉dpm)∊<˘⍉tpm
-    #•Show (<˘⍉tpm)⊐(<˘⍉dpm)
-    #dpmatch ← (<˘⍉tpm)⊐(<˘⍉dpm)
-    #tpmatch ← (<˘⍉dpm)⊐(<˘⍉tpm)
-
-
     {
-      d←Depth tp
+      PathMat ←{
+        d←Depth 𝕩
+        dm←d=⌜˜↕⌈´d+1 
+        dm↩ ⌈`˘⍉+`˘⍉(↕≠𝕨)⊸×˘dm
+        ⊏⟜𝕨˘dm
+      }
+      •Show dpm ← dkr PathMat dkp
+      •Show tpm ← tkr PathMat tkp
+      •Show dpmatch ← (<˘⍉tpm)⊐(<˘⍉dpm)
+      •Show tpmatch ← (<˘⍉dpm)⊐(<˘⍉tpm)
+
+
+      # for each data at lowest find matching template
+
+      td←Depth tp
+      dd←Depth dp
+
+      #k←dt='k'
+      m←dd=⌈´dd # all items at max depth
+      z←m
+
+      #parent of children k->v -> then rematch as v
+      pp←⊑⟜dp¨/z
+      ##•Show (⊑⟜dp¨/z)⊏dt
+
+
+
+      #(pp⊏dr)⊏dn
+
+      ## map to key index
+      #•Show pp
+      #•Show dki
+      ## match to template depth path matrix index
+      zz←(dki⊐pp)⊏dpmatch
+
+      # get surrounding sibling fragments ie same parents
+      #•Show zz
+      #•Show /⁼zz
+      •Show qq←∨´{ 𝕩=tp }¨zz⊏tkp⊏tki
+      #•Show zz⊏tki
+
+      •Show fg← ((/qq)⊏tr)⊏tn # fragments
+      •Show k← (zz⊏tkr)⊏tn
+      •Show v← (z/dr)⊏dn # values
+
+      #•Show k⊐fg
+      #•Show mm ← fg∊k
+      #•Show in←(mm/k⊐fg)⊸⊏ v
+      #•Show in⌾(mm⊸/) fg
+
+      ## apply 
+
+      •Show cn← (zz⊏tkr)⊏tn
+      •Show cr← ↕≠cn
+      •Show cp← ↕≠cn
+
+
+      #•Show pp⊏(+`k)
+      #•Show ((pp⊏(+`k))⊏dpmatch)⊏tn
+      #•Show pp
+      #•Show m
+
+      #(∾1↑¨dt) Draw dp
+      #⟨ dt⟩ Draw dp
+      #({}⌾((dt='k')⊸/) ∾1↑¨dt) Draw dp
+
+      #(∾1↑¨dkr⊏tn) Draw dkp
+      #•Show (z/1-˜+`v)⊏dpmatch
+      #•Show ((z/1-˜+`k)⊏tpmatch)
+
+      #•Show (((z/1-˜+`k)⊏tpmatch)⊏dki)
+      #•Show c←∨´dp⊸=¨(((z/1-˜+`k)⊏tpmatch)⊏dki) # find children with these parents
+
+
+      #•Show ((z/1-˜+`k)⊏tkr)⊏tn
+
+      #•Show (((z/1-˜+`k)⊏tpmatch)⊏tn)
+
+      #•Show keys ← ⊑⟜dp¨(((z/1-˜+`k)⊏tpmatch)⊏dki) # template keys matching to data key index
+
+      #{
+        ## find all items with parent index
+        #•Show p←𝕩⊑dp
+        #t← p⊑dt
+
+      #}¨(((z/1-˜+`k)⊏tpmatch)⊏dki) # template keys matching to data key index
+
+      #(∾1↑¨dkr⊏tn) Draw dkp
+
+      #r ← tr(⊢/×)z # references for current depth
+
+      #•Show z
+
+    }
+
+
+    #{ 𝕊:
+
+      #•Show tpm
       #•Show tpmatch
+
+      #•Show dpm
       #•Show dpmatch
+
+      #•Show k←tt='k'
+      #•Show m←d=⌈´d
+      #•Show z←(m∧k)
+      #r ←tr(⊢/×)z # references for current depth
+      
+      #•Show tn⊏˜tr(⊢/×)z
+      #•Show /(z×tr)/tn
+
+      #•Show d≍tkp
       ## while
 
-      #•Show m←d=⌈´d
-      #•Show k←tt='k'
-      #•Show z←(m∧k)×+`k
 
       # get children of depth x
         # get parent
@@ -190,7 +256,7 @@ Compile ⇐ {
       #•Show (m∧k)×tp⊏tp
       # replace 
       #•Show ⌾((0>z)⊸/) z
-    }
+    #}
 
 
 
