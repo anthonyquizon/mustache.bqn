@@ -3,14 +3,16 @@
 #            https://www.youtube.com/watch?v=5I4YPkVU7mY
 
 # types
-⟨ none, opn_bkt, cls_bkt, hash, slash, str,     # characters
-  opn_dm, cls_dm,                               # markers
-  tag, opn, cls, key                            # tags
+⟨ none, opn_bkt, cls_bkt, hash, slash, str, bang,     # characters
+  opn_dm, cls_dm,                   # markers
+  tag, opn, cls, key                                  # tags
+⟩ ← ↕13
 
-  # mark as 
-⟩ ← ↕12
-
-labels ⇐ "f    s  tock"
+labels ⇐ ∾⟨
+  "f......",
+  "..",
+  "tock"
+⟩
 
 #v: previous value
 _fix ← { Fn←𝔽 ⋄ v←@ ⋄ {v↩𝕩 ⋄ Fn 𝕩} •_while_ { 𝕩≢v } 𝕩 }
@@ -61,6 +63,16 @@ Parse ⇐ {
 
   # TODO multiple sources
 
+  # remove comments
+  #{ 
+    #o←(t=opn_dm)∧(«t=bang) 
+    #c←(t=cls_dm)
+    #m←`o-c
+    #•Show m
+
+    ##⋄ z←¬∨⟜»m ⋄ t↩z/t⌈»»m×opn_com ⋄ r↩z/r 
+    #}
+
   # find tags - delete open and close and lead with tag flag
   { o←t=opn_dm ⋄ c←t=cls_dm ⋄ z←¬c ⋄ t↩z/t⌈o×tag ⋄ r↩z/r }
   # mark opn tags - consume {# and set str as id (»»)
@@ -87,7 +99,39 @@ Parse ⇐ {
   { ptr⇐ [p, ⊢◶labels¨t, r] ⋄  n ⇐ n }
 }
 
+
 Compile ⇐ {
+   𝕨 𝕊 𝕩 : (¬𝕩 •ns.Has "ptr") ? 𝕨 𝕊 (ParseNs 𝕩);
+   𝕨 𝕊 𝕩 : 
+    ⟨[tp,tt,tr]⇐ptr,tn⇐n⟩←𝕨 ⋄ ⟨[dp,dt,dr]⇐ptr,dn⇐n⟩←𝕩
+    k←((tt='k')/tr)⊏tn #shared keys
+
+    # prune key strings that don't exist in template variables
+    {
+      m←k⊐(((dt='k')/dr)⊏dn)
+      z ← ((≠k)=m)⌾((dt='k')⊸/) (≠dt)⥊0 ⋄ { z↩z∨(𝕩⊏z) ⋄ 𝕩⊏dp} _fix dp # mark unused data variables and remove orphanded children
+      dp↩z Delete dp ⋄ dt↩(¬z)/dt ⋄ dr↩(¬z)/dr
+    }
+
+    # remap data key reference names to shared reference names to have common indices
+    { dk←(((dt='k')/dr)⊏dn) ⋄ dr↩(k⊐dk)⌾((dt='k')⊸/) dr }
+    
+    # create path matrices
+    {
+      PathMat ←{
+        d←Depth 𝕩
+        dm←d=⌜˜↕⌈´d+1 
+        dm↩ ⌈`˘⍉+`˘⍉(↕≠𝕨)⊸×˘dm
+        ⊏⟜𝕨˘dm
+      }
+
+      •Show dm ← dr PathMat dp
+      •Show tm ← tr PathMat tp
+    }
+}
+
+
+Compile0 ⇐ {
    𝕨 𝕊 𝕩 : (¬𝕩 •ns.Has "ptr") ? 𝕨 𝕊 (ParseNs 𝕩);
    𝕨 𝕊 𝕩 : 
     ⟨[tp,tt,tr]⇐ptr,tn⇐n⟩←𝕨 ⋄ ⟨[dp,dt,dr]⇐ptr,dn⇐n⟩←𝕩
@@ -141,88 +185,57 @@ Compile ⇐ {
       •Show tpm ← tkr PathMat tkp
       •Show dpmatch ← (<˘⍉tpm)⊐(<˘⍉dpm)
       •Show tpmatch ← (<˘⍉dpm)⊐(<˘⍉tpm)
-
+      
 
       # for each data at lowest find matching template
 
       td←Depth tp
       dd←Depth dp
 
-      #k←dt='k'
-      m←dd=⌈´dd # all items at max depth
-      z←m
-
-      #parent of children k->v -> then rematch as v
-      pp←⊑⟜dp¨/z
-      ##•Show (⊑⟜dp¨/z)⊏dt
-
-
-
-      #(pp⊏dr)⊏dn
-
-      ## map to key index
-      #•Show pp
-      #•Show dki
-      ## match to template depth path matrix index
-      zz←(dki⊐pp)⊏dpmatch
-
-      # get surrounding sibling fragments ie same parents
-      #•Show zz
-      #•Show /⁼zz
-      •Show qq←∨´{ 𝕩=tp }¨zz⊏tkp⊏tki
-      #•Show zz⊏tki
-
-      •Show fg← ((/qq)⊏tr)⊏tn # fragments
-      •Show k← (zz⊏tkr)⊏tn
-      •Show v← (z/dr)⊏dn # values
-
-      #•Show k⊐fg
-      #•Show mm ← fg∊k
-      #•Show in←(mm/k⊐fg)⊸⊏ v
-      #•Show in⌾(mm⊸/) fg
-
-      ## apply 
-
-      •Show cn← (zz⊏tkr)⊏tn
-      •Show cr← ↕≠cn
-      •Show cp← ↕≠cn
-
-
-      #•Show pp⊏(+`k)
-      #•Show ((pp⊏(+`k))⊏dpmatch)⊏tn
-      #•Show pp
-      #•Show m
-
-      #(∾1↑¨dt) Draw dp
-      #⟨ dt⟩ Draw dp
-      #({}⌾((dt='k')⊸/) ∾1↑¨dt) Draw dp
-
-      #(∾1↑¨dkr⊏tn) Draw dkp
-      #•Show (z/1-˜+`v)⊏dpmatch
-      #•Show ((z/1-˜+`k)⊏tpmatch)
-
-      #•Show (((z/1-˜+`k)⊏tpmatch)⊏dki)
-      #•Show c←∨´dp⊸=¨(((z/1-˜+`k)⊏tpmatch)⊏dki) # find children with these parents
-
-
-      #•Show ((z/1-˜+`k)⊏tkr)⊏tn
-
-      #•Show (((z/1-˜+`k)⊏tpmatch)⊏tn)
-
-      #•Show keys ← ⊑⟜dp¨(((z/1-˜+`k)⊏tpmatch)⊏dki) # template keys matching to data key index
 
       #{
-        ## find all items with parent index
-        #•Show p←𝕩⊑dp
-        #t← p⊑dt
+        #•Show 𝕩
+        ##k←dt='k'
+        #m←dd=𝕩∨(dt='v')
+        #z←m
 
-      #}¨(((z/1-˜+`k)⊏tpmatch)⊏dki) # template keys matching to data key index
+        ##parent of children k->v -> then rematch as v
+        #•Show pp←⊑⟜dp¨/z
+        ###•Show (⊑⟜dp¨/z)⊏dt
 
-      #(∾1↑¨dkr⊏tn) Draw dkp
+        ##(pp⊏dr)⊏dn
 
-      #r ← tr(⊢/×)z # references for current depth
+        ### map to key index
+        ##•Show pp
+        ##•Show dki
+        ### match to template depth path matrix index
+        #•Show pp⊏dpmatch
+        ##•Show dpmatch
+        #zz←pp⊏dpmatch
 
-      #•Show z
+        ## get surrounding sibling fragments ie same parents
+        ##•Show zz
+        ##•Show /⁼zz
+        #•Show qq←∨´{ 𝕩=tp }¨zz⊏tkp⊏tki
+        ##•Show zz⊏tki
+
+        #•Show fg← ((/qq)⊏tr)⊏tn # fragments
+        #•Show k← (zz⊏tkr)⊏tn
+        #•Show v← (z/dr)⊏dn # values
+
+        ##•Show k⊐fg
+        ##•Show mm ← fg∊k
+        ##•Show in←(mm/k⊐fg)⊸⊏ v
+        ##•Show in⌾(mm⊸/) fg
+
+        ### apply 
+
+        #•Show cn← (zz⊏tkr)⊏tn
+        #•Show cr← ↕≠cn
+        #•Show cp← ↕≠cn
+
+        ##cp‿cr‿cn
+      #}¨ ⟨⌈´td⟩
 
     }
 

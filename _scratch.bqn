@@ -13,6 +13,8 @@ a ← {
     ⟩}
   ⟩,
   each⇐⟨
+    {lemon⇐1, mango⇐2},
+    {lemon⇐1, mango⇐2},
     {lemon⇐1, mango⇐2}
   ⟩,
   grape⇐⟨
@@ -20,11 +22,11 @@ a ← {
   ⟩,
 }
 
-
-
-⟨[p,t,r]⇐ptr,n⇐n⟩←mustache.ParseNs a
+#⟨[p,t,r]⇐ptr,n⇐n⟩←mustache.ParseNs a
 
 #(∾1↑¨t) Draw p
-tpl ← mustache.Parse (•file.Chars "test.mustache")
+tpl ← mustache.Parse (•file.Chars "test0.mustache")
+#tpl ← mustache.Parse (•file.Chars "test1.mustache")
+[p,t,r] ← tpl.ptr
 tpl mustache.Compile a
 
