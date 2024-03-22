@@ -7,15 +7,19 @@ mustache ← •Import "mustache.bqn"
 
 a ← {
   peach⇐⟨
-    {foo⇐333, bar⇐⟨{baz⇐444}, {baz⇐555}⟩}
+    {fig⇐333, apple⇐⟨
+      {banana⇐444, cheese⇐"hello"}, 
+      {banana⇐555, cheese⇐"weee"}
+    ⟩}
   ⟩,
   each⇐⟨
-    {foo⇐111, bar⇐222}
+    {lemon⇐111, mango⇐222}
   ⟩,
-  bleach⇐⟨
-    {foo⇐111, bar⇐222}
+  grape⇐⟨
+    {lemon⇐111, mango⇐222}
   ⟩,
 }
+
 
 #mustache.ParseNs a
 tpl ← mustache.Parse (•file.Chars "test.mustache")

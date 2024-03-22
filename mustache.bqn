@@ -12,8 +12,8 @@
 
 labels ⇐ "f    s  tock"
 
-# TODO use _while_
-_Fix ← {𝔽∘⊢⍟≢⟜𝔽_𝕣∘⊢⍟≢⟜𝔽𝕩}
+#v: previous value
+_fix ← { Fn←𝔽 ⋄ v←@ ⋄ {v↩𝕩 ⋄ Fn 𝕩} •_while_ { 𝕩≢v } 𝕩 }
 
 Delete ← { (/𝕨)(⊢-⍋)(¬𝕨)/𝕩 }
 Parent ⇐ { g←⊔𝕩 ⋄ (↕≠𝕩) {a‿w←𝕨 ⋄ (⊏⟜a 1-˜a⍋w)⌾(w⊸⊏) 𝕩 }´ (1↓(»g){𝕨‿𝕩}¨g) }
@@ -108,6 +108,7 @@ Compile ⇐ {
       dkp↩ ((dt='o') ∨ (dt='v')) Delete dkp #delete objs and keys
 
       dkr↩(dt='k')/dr
+
      }
 
      # create template parent vector of only keys
@@ -116,26 +117,99 @@ Compile ⇐ {
 
     # set data key indices to match template indices and remove any non existing keys
     {
-      z←(tkr⊏tn)⊐(dkr⊏dn)
-      z↩⊏⟜tkr⌾(((≠tkr)≠z)⊸/) z
-      m←(≠tkr)=z
+      # find names that don't exist in template variables
+      e←(tkr⊏tn)⊐(dkr⊏dn)
+      # z mask to remove all non existing data names and delete all children with deleted parents
+      z←(≠tkr)=e ⋄ { z↩z∨(𝕩⊏z) ⋄ 𝕩⊏dkp} _fix dkp
+      # map references to names that do exist to matching template references
+      m←⊏⟜tkr⌾(((≠tkr)≠e)⊸/) e
 
-      dkp↩m Delete dkp
-      dkr↩(¬m)/z
+      # delete all references that do not have a name variable in template
 
-      Draw dkp
+      # delete all children of parents of non existing vars
+      #•Show dkp≍z
+      #•Show (∾1↑¨dkr⊏dn)
+
+      #•Show [↕≠dkp, dkp,z, (∾1↑¨dkr⊏dn)]
+      #(∾1↑¨dkr⊏dn) Draw dkp
+      dkp↩z Delete dkp
+      #•Show dkp
+      
+      #•Show dkp
+      #•Show (/z)
+      #dkp↩z Delete dkp
+      dkr↩(¬z)/m
+
+      #•Show dkp
+      (∾1↑¨dkr⊏tn) Draw dkp
     }
 
+
+      #(∾1↑¨tkr⊏tn) Draw tkp
 
 
     #•Show tn
     #•Show ⍋tkr⊏tn
     #•Show dkr⊏dn
+
+    # extract valid paths
+    PathMat ←{
+      d←Depth 𝕩
+      dm←d=⌜˜↕⌈´d+1 
+      dm↩ ⌈`˘⍉+`˘⍉(↕≠𝕨)⊸×˘dm
+      ⊏⟜𝕨˘dm
+    }
+    #•Show dpm ← dkr PathMat dkp
+    #•Show tpm ← tkr PathMat tkp
+
+
+    #•Show (<˘⍉dpm)
+    #•Show <˘⍉tpm
+    #•Show (<˘⍉dpm)∊<˘⍉tpm
+    #•Show (<˘⍉tpm)⊐(<˘⍉dpm)
+    #dpmatch ← (<˘⍉tpm)⊐(<˘⍉dpm)
+    #tpmatch ← (<˘⍉dpm)⊐(<˘⍉tpm)
+
+
+    {
+      d←Depth tp
+      #•Show tpmatch
+      #•Show dpmatch
+      ## while
+
+      #•Show m←d=⌈´d
+      #•Show k←tt='k'
+      #•Show z←(m∧k)×+`k
+
+      # get children of depth x
+        # get parent
+          # separate to parent
+            # parent key is now children rendered
+          
+
+      #•Show (m∧k)×tp⊏tp
+      # replace 
+      #•Show ⌾((0>z)⊸/) z
+    }
+
+
+
+
     #{
       #d←Depth dkp
-      #•Show dkr
       #dm←d=⌜˜↕⌈´d+1 
-      #•Show {(≠d)↑𝕩/dkr}˘dm
+      #•Show dkr
+      #•Show dm
+      #•Show ⍉+`˘⍉dm
+      ##•Show {  ⊐⌾(𝕩⊸/) dkr}˘dm
+    #}
+
+    #{
+      #d←Depth tkp
+      #•Show tkr
+      #dm←d=⌜˜↕⌈´d+1 
+      #•Show dm
+      ##•Show {(≠d)↑𝕩/tkr}˘dm
     #}
     #(0⊸⊏¨tkr) Draw tkp
     #({0⊑𝕩⊑tn}¨tkr)  Draw tkp
