@@ -15,7 +15,7 @@ labels ⇐ ∾⟨
 ⟩
 
 #v: previous value
-_fix ← { Fn←𝔽 ⋄ v←@ ⋄ {v↩𝕩 ⋄ Fn 𝕩} •_while_ { 𝕩≢v } 𝕩 }
+_fix ← { Fn←𝔽 ⋄ v←@ ⋄ {v↩𝕩 ⋄ v Fn 𝕩} •_while_ { 𝕩≢v } 𝕩 }
 
 Delete ← { (/𝕨)(⊢-⍋)(¬𝕨)/𝕩 }
 Parent ⇐ { g←⊔𝕩 ⋄ (↕≠𝕩) {a‿w←𝕨 ⋄ (⊏⟜a 1-˜a⍋w)⌾(w⊸⊏) 𝕩 }´ (1↓(»g){𝕨‿𝕩}¨g) }
@@ -99,34 +99,51 @@ Parse ⇐ {
   { ptr⇐ [p, ⊢◶labels¨t, r] ⋄  n ⇐ n }
 }
 
+PathMat ←{ p←𝕨 ⋄ pm←𝕩 ⋄ {q←𝕩⊏p ⋄ pm ↩pm∾˘q ⋄ q} _Fix pm ⋄ ¯1↓˘pm }
 
 Compile ⇐ {
-   𝕨 𝕊 𝕩 : (¬𝕩 •ns.Has "ptr") ? 𝕨 𝕊 (ParseNs 𝕩);
-   𝕨 𝕊 𝕩 : 
-    ⟨[tp,tt,tr]⇐ptr,tn⇐n⟩←𝕨 ⋄ ⟨[dp,dt,dr]⇐ptr,dn⇐n⟩←𝕩
-    k←((tt='k')/tr)⊏tn #shared keys
+ 𝕨 𝕊 𝕩 : (¬𝕩 •ns.Has "ptr") ? 𝕨 𝕊 (ParseNs 𝕩);
+ 𝕨 𝕊 𝕩 : 
+  ⟨[tp,tt,tr]⇐ptr,tn⇐n⟩←𝕨 ⋄ ⟨[dp,dt,dr]⇐ptr,dn⇐n⟩←𝕩
+  k←((tt='k')/tr)⊏tn #shared keys
+  dm←@ ⋄ tm←@ # path matrices
 
-    # prune key strings that don't exist in template variables
-    {
-      m←k⊐(((dt='k')/dr)⊏dn)
-      z ← ((≠k)=m)⌾((dt='k')⊸/) (≠dt)⥊0 ⋄ { z↩z∨(𝕩⊏z) ⋄ 𝕩⊏dp} _fix dp # mark unused data variables and remove orphanded children
-      dp↩z Delete dp ⋄ dt↩(¬z)/dt ⋄ dr↩(¬z)/dr
-    }
+  # prune key strings that don't exist in template variables
+  {
+    m←k⊐(((dt='k')/dr)⊏dn)
+    z ← ((≠k)=m)⌾((dt='k')⊸/) (≠dt)⥊0 ⋄ { z↩z∨(𝕩⊏z) ⋄ 𝕩⊏dp} _fix dp # mark unused data variables and remove orphanded children
+    dp↩z Delete dp ⋄ dt↩(¬z)/dt ⋄ dr↩(¬z)/dr
+  }
 
+    # TODO remao tn to k
+    { tk←(((tt='k')/tr)⊏tn) ⋄ tr↩(k⊐tk)⌾((tt='k')⊸/) tr }
     # remap data key reference names to shared reference names to have common indices
     { dk←(((dt='k')/dr)⊏dn) ⋄ dr↩(k⊐dk)⌾((dt='k')⊸/) dr }
     
-    # create path matrices
+    # create depth key matrices
+    # apply name indices to depth key matrices
     {
-      PathMat ←{
-        d←Depth 𝕩
-        dm←d=⌜˜↕⌈´d+1 
-        dm↩ ⌈`˘⍉+`˘⍉(↕≠𝕨)⊸×˘dm
-        ⊏⟜𝕨˘dm
-      }
 
-      •Show dm ← dr PathMat dp
-      •Show tm ← tr PathMat tp
+      dm← dp PathMat /(dt='k')
+      tm← tp PathMat /(tt='k')
+      •Show dm
+      •Show n←⌈´+´˘{(𝕩⊏dt)='k'}˘dm
+
+      •Show ⊏⟜dr˘dm
+      zz← {
+          
+          c←((𝕩⊏dt)='k')
+          z← c/𝕩
+          (n↑z∾n⥊⊑⌽z)
+      }˘dm
+
+      #•Show ((dt='k')/dr)⊏k
+
+      •Show ((/dt='k')⊏dr)⊏k
+      •Show ((/tt='k')⊏tr)⊏k
+      •Show dm
+      •Show ⊏⟜dr˘zz
+      •Show ⊏⟜tr˘tm
     }
 }
 
