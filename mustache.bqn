@@ -105,46 +105,73 @@ Compile ⇐ {
  𝕨 𝕊 𝕩 : (¬𝕩 •ns.Has "ptr") ? 𝕨 𝕊 (ParseNs 𝕩);
  𝕨 𝕊 𝕩 : 
   ⟨[tp,tt,tr]⇐ptr,tn⇐n⟩←𝕨 ⋄ ⟨[dp,dt,dr]⇐ptr,dn⇐n⟩←𝕩
-  k←((tt='k')/tr)⊏tn #shared keys
-  dm←@ ⋄ tm←@ # path matrices
+  kn←((tt='k')/tr)⊏tn #shared keys
+  dm←@ ⋄ tm←@ # key match indices
+  tk←@ ⋄ dk←@
+  rr←⟨⟩⋄rn←⟨⟩
+
 
   # prune key strings that don't exist in template variables
   {
-    m←k⊐(((dt='k')/dr)⊏dn)
-    z ← ((≠k)=m)⌾((dt='k')⊸/) (≠dt)⥊0 ⋄ { z↩z∨(𝕩⊏z) ⋄ 𝕩⊏dp} _fix dp # mark unused data variables and remove orphanded children
+    m←kn⊐(((dt='k')/dr)⊏dn)
+    z ← ((≠kn)=m)⌾((dt='k')⊸/) (≠dt)⥊0 ⋄ { z↩z∨(𝕩⊏z) ⋄ 𝕩⊏dp} _fix dp # mark unused data variables and remove orphanded children
     dp↩z Delete dp ⋄ dt↩(¬z)/dt ⋄ dr↩(¬z)/dr
   }
 
-    # TODO remao tn to k
-    { tk←(((tt='k')/tr)⊏tn) ⋄ tr↩(k⊐tk)⌾((tt='k')⊸/) tr }
-    # remap data key reference names to shared reference names to have common indices
-    { dk←(((dt='k')/dr)⊏dn) ⋄ dr↩(k⊐dk)⌾((dt='k')⊸/) dr }
-    
-    # create depth key matrices
-    # apply name indices to depth key matrices
-    {
+  { k←(((tt='k')/tr)⊏tn) ⋄ tk↩¯1¨tr ⋄ tk↩(kn⊐k)⌾((tt='k')⊸/) tk }
+  # remap data key reference names to shared reference names to have common indices
+  { k←(((dt='k')/dr)⊏dn) ⋄ dk↩¯1¨dr ⋄ dk↩(kn⊐k)⌾((dt='k')⊸/) dk }
+  # create find matching reference paths from keys. 
+  # ie foo->bar->baz in data matches with foo->bar->baz in template rather than foo->bar->quux
+  {
+    •Show trp← ⊏⟜tk˘tp PathMat /(tt='k') ⋄ n←1⊑≢trp # trp: template reference paths
+    •Show drp← ⊏⟜dk˘{ m←𝕩/˜'k'=𝕩⊏dt ⋄ n↑m∾n⥊⊑⌽m }˘ dp PathMat /(dt='k') # drp: data reference paths
+    dm↩trp⊸⊐˘drp ⋄ tm↩drp⊸⊐˘trp
+  }
 
-      dm← dp PathMat /(dt='k')
-      tm← tp PathMat /(tt='k')
-      •Show dm
-      •Show n←⌈´+´˘{(𝕩⊏dt)='k'}˘dm
+  {
+    d←Depth tp
+    m←d=⌈´d # lowest depth
+    tk←tt='k'
+    •Show tl←(1-˜+`tk)/˜m∧tk # indices of template keys in key array (ie. array if there were only keys) that are lowest
 
-      •Show ⊏⟜dr˘dm
-      zz← {
-          
-          c←((𝕩⊏dt)='k')
-          z← c/𝕩
-          (n↑z∾n⥊⊑⌽z)
-      }˘dm
+    # template parents mapped to children data of matching data parents 
+    •Show n←(≠tl)
+    •Show i←dm/˜dm∊tl
+    •Show g←tl⊸⊐¨(1-˜+`0=n|↕≠i)⊔i # group as set indices in v
+    •SHow v←⊏⟜dn⊏⟜dr/((dt='v')∧dp∊(dm∊tl)//dt='k')
+    •Show 
 
-      #•Show ((dt='k')/dr)⊏k
+    •Show ((/m∧tk)⊏tr)⊏tn
+    •Show z←(tk∧m)/tk×(1-˜+`m)
+    •Show nn←((/m)⊏tr)⊏tn
+    •Show m
+    •Show z
+    •Show z⊏nn
+    •Show ∾{(𝕩)⌾(z⊸⊏) nn}¨⊏⟜v¨g+¨n×↕≠g # access value with key offsets
 
-      •Show ((/dt='k')⊏dr)⊏k
-      •Show ((/tt='k')⊏tr)⊏k
-      •Show dm
-      •Show ⊏⟜dr˘zz
-      •Show ⊏⟜tr˘tm
-    }
+    #•Show (1-˜+`tk)
+    #•Show ((/m)⊏tr)⊏tn
+    #•Show tl
+
+    # 
+    # mark 
+
+    #•Show (m∧tk)
+    #•Show ((m∧tk)/tr)⊏kn
+    #•Show ((m∧¬tk)/tr)⊏tn
+    #•Show tl⊏tm # map template keys to data vales
+
+    #rr↩rr∾(≠rr)+↕≠m
+    #rn↩rn∾(dr/˜dt='v')⊏dn
+
+    #•Show rr
+    #•Show rn
+
+    #dt ↩ 'v'¨⌾(m⊸⊏) dt 
+
+  }
+  #
 }
 
 

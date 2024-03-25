@@ -8,14 +8,14 @@ mustache ← •Import "mustache.bqn"
 a ← {
   peach⇐⟨
     {fig⇐1, apple⇐⟨
-      {banana⇐2, cheese⇐"hello"}, 
+      {cheese⇐"hello", banana⇐2}, 
       {banana⇐3, cheese⇐"weee"}
     ⟩}
   ⟩,
   each⇐⟨
-    {lemon⇐1, mango⇐2},
-    {lemon⇐1, mango⇐2},
-    {lemon⇐1, mango⇐2}
+    {banana⇐1, mango⇐2},
+    {banana⇐1, mango⇐2},
+    {banana⇐1, mango⇐2}
   ⟩,
   grape⇐⟨
     {lemon⇐3, mango⇐4}
