@@ -109,15 +109,7 @@ Compile ⇐ {
   kn←((tt='k')/tr)⊏tn #shared keys
   dm←@ ⋄ tm←@ # key match indices
   tk←@ ⋄ dk←@
-  rr←⟨⟩⋄rn←⟨⟩
-
-
-  # prune key strings that don't exist in template variables
-  {
-    m←kn⊐(((dt='k')/dr)⊏dn)
-    z ← ((≠kn)=m)⌾((dt='k')⊸/) (≠dt)⥊0 ⋄ { z↩z∨(𝕩⊏z) ⋄ 𝕩⊏dp} _fix dp # mark unused data variables and remove orphanded children
-    dp↩z Delete dp ⋄ dt↩(¬z)/dt ⋄ dr↩(¬z)/dr
-  }
+  rp←⟨⟩⋄rr←⟨⟩⋄rn←⟨⟩
 
   { k←(((tt='k')/tr)⊏tn) ⋄ tk↩¯1¨tr ⋄ tk↩(kn⊐k)⌾((tt='k')⊸/) tk }
   # remap data key reference names to shared reference names to have common indices
@@ -127,64 +119,115 @@ Compile ⇐ {
   {
     •Show trp← ⊏⟜tk˘tp PathMat /(tt='k') ⋄ n←1⊑≢trp # trp: template reference paths
     •Show drp← ⊏⟜dk˘{ m←𝕩/˜'k'=𝕩⊏dt ⋄ n↑m∾n⥊⊑⌽m }˘ dp PathMat /(dt='k') # drp: data reference paths
-    •Show dm↩trp⊸⊐˘drp ⋄ •Show tm↩drp⊸⊐˘trp
+    dm↩trp⊸⊐˘drp ⋄ tm↩drp⊸⊐˘trp
   }
 
+  # prune key strings that don't exist path matrix ie don't exist as a tempalate variable
   {
-    d← Depth tp ⋄ tk←1-˜+`tt='k'
-    {
-      #m∧tk # indices of template keys in key array (ie. array if there were only keys) that are lowest
-      m←d=𝕩
-     
-
-      ##•Show mk ←(1-˜(m∧tk)/+`>⟜»(m∧tk)) # mask group indices
-
-      #•Show /m∧tk
-      ##•Show mk⊔tl
-      #•Show (1-˜+`tk)≍m∧tk
-      #•Show tl
-      #•Show /m∧tk
-      v←dt='v'
-
-      •Show {
-        m←'k'=𝕩⊏tt # key mask
-        k←(m/𝕩)⊏tk # key indices
-        s← ⊏⟜tn 𝕩⊏tr # strings
-        i←/(dt='v')∧dp∊(dm∊k)//dt='k'# indices of values and also if its parents equal to the mapped keys 
-        q←(1-˜+`0=(≠k)|↕≠i) # group indices
-        o←(q×≠k)+k⊐(dm∊k)/dm # index order mapping with offset depending on group
-        v←⊏⟜dn⊏⟜dr o⊏i # values
-        { (𝕩)⌾(m⊸/) s} ¨q⊔v
-      }¨(1-˜m/+`>⟜»m)⊔(/m)
-      #{
-
-        #•Show 'k'=𝕩⊏tt
-
-      ##•Show s←⊏⟜tn¨mi⊔(/m)⊏tr # strings
-
-      #}¨(1-˜m/+`>⟜»m)⊔⊏⟜tr/m
-
-      #•Show s←⊏⟜tn¨mi⊔(/m)⊏tr # strings
-      #•Show km←∊⟜(/tk)¨mi⊔/m
-      #•Show km←∊⟜(/tk)¨/m
-      #•Show k←dm/˜dm∊tl   #indices of keys
-      #•Show (/tk)∊/m
-      #•Show v←⊏⟜dn⊏⟜dr/((dt='v')∧dp∊(dm∊tl)//dt='k') # values of keys
-
-      #⌾∾ s
-      #mi⊔/m
+    k←(dt='k') ⋄ m←dm=≠tm ⋄ z←(m)⌾(k⊸/) 0¨k
+    { z↩z∨(𝕩⊏z) ⋄ 𝕩⊏dp} _fix dp # mark unused data variables and remove orphanded children
+    dp↩z Delete dp ⋄ dt↩(¬z)/dt ⋄ dr↩(¬z)/dr # remove from data tree
+    # remap key maps
+    tm↩tm⊏+`¬m ⋄ dm↩(¬m)/dm
+  }
 
 
-      ⟨⟩¨
+
+  Draw dp 
 
 
+
+    #z←((≠kn)=m)⌾((dt='k')⊸/) (≠dt)⥊0 ⋄ 
+
+
+    #•Show ((/dt='k')⊏dr)⊏dn
+
+    #•Show k
+
+    #•Show tm
+    #•Show dm
+
+    #•Show ¬k∊tm
+    #•Show (((¬k∊tm)/k)⊏dr)⊏dn
+
+    #v←/dt='v'
+    #p←v⊏dp
+    #m←(/k)∊tm
+  #{
+    #•Show (/k∊p)∊ # get parents in key index space
+    #•Show (((/k∊p)⊏tm)⊏tr)
+    #•Show ((/k∊p)⊏dk)⊏kn
+    #•Show (/k∊p)⊏dm
+  #}
+
+  # fill all value level data
+  #{
+    #d← Depth tp ⋄ tki←1-˜+`tk←tt='k'
+
+    #{ 
+      #m←d=𝕩∧tk
+      #•Show m
+      #•Show p←(/m)⊏tp
+      #•Show q←(1-˜m/+`>⟜»m)
       
+      #•Show i←(dt='v')∧dp∊(dm∊/m)//dt='k' # data value indices of mapped template keys at current depth
+        #v←⊏⟜dn⊏⟜dr o⊏i # values
 
-    }¨⟨2⟩
+        ##i←/(dt='v')∧dp∊(dm∊k)//dt='k'# indices of values and also if its parents equal to the mapped keys 
+
+      #@
+    #}¨⟨2⟩#⌽↕⌈´d+1
+
+    #{
+      #•Show tk
+      ##•Show k←𝕩⊏tk # key indices
+      #•Show 𝕩∧
+    #}˘
+  #}
+
+  #{
+    #d← Depth tp ⋄ tk←1-˜+`tt='k'
+    #{
+      #m←d=𝕩
+      #p←(/m)⊏tp
+      #q←(1-˜m/+`>⟜»m)
+        #•Show "xxx"
+
+      #(∾⍷¨q⊔p) {
+        #m←'k'=𝕩⊏tt # key mask
+        #k←(m/𝕩)⊏tk # key indices
+        #•Show m
+        ##s← ⊏⟜tn 𝕩⊏tr # strings
+        #•Show "--"
+
+        #•Show i←/(dt='v')∧dp∊(dm∊k)//dt='k'# indices of values and also if its parents equal to the mapped keys (from data mapping key table)
+        #•Show q←(1-˜+`0=(≠k)|↕≠i) # group indices
+        #•Show k⊐(dm∊k)/dm
+        #•Show q
+        #o←(q×≠k)+k⊐(dm∊k)/dm # index order mapping with offset depending on group
+        #v←⊏⟜dn⊏⟜dr o⊏i # values
+
+        ## add values to tree
+
+        ##n ← ∾{(𝕩)⌾(m⊸/) s} ¨q⊔v
+        
+        ##rr↩ (≠rn)¨⌾(𝕨⊸⊏) rr
+        ##rn↩rn ∾ ⟨n⟩
+      #}¨q⊔(/m)
+
+      ## set all used data types to value
+      ##{
+        ##m←'k'=𝕩⊏tt # key mask
+        ##k←(m/𝕩)⊏tk # key indices
+        ##i←/(dt='v')∧dp∊(dm∊k)//dt='k'# indices of values and also if its parents equal to the mapped keys 
+        ##dt↩ 'v'¨⌾(i⊸⊏) dt
+      ##}¨q⊔(/m)
+    #}¨⟨2,1⟩
+
+  #}
     #}¨⌽↕⌈´d+1 # depth level matrix 
 
 
-    •Show 
     #m←d=⌈´d # lowest depth
     #tk←tt='k'
     #•Show tl←(1-˜+`tk)/˜m∧tk # indices of template keys in key array (ie. array if there were only keys) that are lowest
@@ -240,7 +283,7 @@ Compile ⇐ {
 
     #dt ↩ 'v'¨⌾(m⊸⊏) dt 
 
-  }
+  #}
   #
 }
 
