@@ -99,7 +99,8 @@ Parse ⇐ {
   { ptr⇐ [p, ⊢◶labels¨t, r] ⋄  n ⇐ n }
 }
 
-PathMat ←{ p←𝕨 ⋄ pm←𝕩 ⋄ {q←𝕩⊏p ⋄ pm ↩pm∾˘q ⋄ q} _Fix pm ⋄ ¯1↓˘pm }
+PathMat ← { p←𝕨 ⋄ pm←𝕩 ⋄ {q←𝕩⊏p ⋄ pm ↩pm∾˘q ⋄ q} _Fix pm ⋄ ¯1↓˘pm }
+#GroupIn ← { 1-˜𝕩/+`>⟜»𝕩 }
 
 Compile ⇐ {
  𝕨 𝕊 𝕩 : (¬𝕩 •ns.Has "ptr") ? 𝕨 𝕊 (ParseNs 𝕩);
@@ -126,29 +127,98 @@ Compile ⇐ {
   {
     •Show trp← ⊏⟜tk˘tp PathMat /(tt='k') ⋄ n←1⊑≢trp # trp: template reference paths
     •Show drp← ⊏⟜dk˘{ m←𝕩/˜'k'=𝕩⊏dt ⋄ n↑m∾n⥊⊑⌽m }˘ dp PathMat /(dt='k') # drp: data reference paths
-    dm↩trp⊸⊐˘drp ⋄ tm↩drp⊸⊐˘trp
+    •Show dm↩trp⊸⊐˘drp ⋄ •Show tm↩drp⊸⊐˘trp
   }
 
   {
-    d←Depth tp
-    m←d=⌈´d # lowest depth
-    tk←tt='k'
-    •Show tl←(1-˜+`tk)/˜m∧tk # indices of template keys in key array (ie. array if there were only keys) that are lowest
+    d← Depth tp ⋄ tk←1-˜+`tt='k'
+    {
+      #m∧tk # indices of template keys in key array (ie. array if there were only keys) that are lowest
+      m←d=𝕩
+     
 
-    # template parents mapped to children data of matching data parents 
-    •Show n←(≠tl)
-    •Show i←dm/˜dm∊tl
-    •Show g←tl⊸⊐¨(1-˜+`0=n|↕≠i)⊔i # group as set indices in v
-    •SHow v←⊏⟜dn⊏⟜dr/((dt='v')∧dp∊(dm∊tl)//dt='k')
+      ##•Show mk ←(1-˜(m∧tk)/+`>⟜»(m∧tk)) # mask group indices
+
+      #•Show /m∧tk
+      ##•Show mk⊔tl
+      #•Show (1-˜+`tk)≍m∧tk
+      #•Show tl
+      #•Show /m∧tk
+      v←dt='v'
+
+      •Show {
+        m←'k'=𝕩⊏tt # key mask
+        k←(m/𝕩)⊏tk # key indices
+        s← ⊏⟜tn 𝕩⊏tr # strings
+        i←/(dt='v')∧dp∊(dm∊k)//dt='k'# indices of values and also if its parents equal to the mapped keys 
+        q←(1-˜+`0=(≠k)|↕≠i) # group indices
+        o←(q×≠k)+k⊐(dm∊k)/dm # index order mapping with offset depending on group
+        v←⊏⟜dn⊏⟜dr o⊏i # values
+        { (𝕩)⌾(m⊸/) s} ¨q⊔v
+      }¨(1-˜m/+`>⟜»m)⊔(/m)
+      #{
+
+        #•Show 'k'=𝕩⊏tt
+
+      ##•Show s←⊏⟜tn¨mi⊔(/m)⊏tr # strings
+
+      #}¨(1-˜m/+`>⟜»m)⊔⊏⟜tr/m
+
+      #•Show s←⊏⟜tn¨mi⊔(/m)⊏tr # strings
+      #•Show km←∊⟜(/tk)¨mi⊔/m
+      #•Show km←∊⟜(/tk)¨/m
+      #•Show k←dm/˜dm∊tl   #indices of keys
+      #•Show (/tk)∊/m
+      #•Show v←⊏⟜dn⊏⟜dr/((dt='v')∧dp∊(dm∊tl)//dt='k') # values of keys
+
+      #⌾∾ s
+      #mi⊔/m
+
+
+      ⟨⟩¨
+
+
+      
+
+    }¨⟨2⟩
+    #}¨⌽↕⌈´d+1 # depth level matrix 
+
+
     •Show 
+    #m←d=⌈´d # lowest depth
+    #tk←tt='k'
+    #•Show tl←(1-˜+`tk)/˜m∧tk # indices of template keys in key array (ie. array if there were only keys) that are lowest
 
-    •Show ((/m∧tk)⊏tr)⊏tn
-    •Show z←(tk∧m)/tk×(1-˜+`m)
-    •Show nn←((/m)⊏tr)⊏tn
-    •Show m
-    •Show z
-    •Show z⊏nn
-    •Show ∾{(𝕩)⌾(z⊸⊏) nn}¨⊏⟜v¨g+¨n×↕≠g # access value with key offsets
+    ## separate out parents
+
+    ## template parents mapped to children data of matching data parents 
+    #•Show n←(≠tl)
+    #•Show i←dm/˜dm∊tl
+    #•Show g←tl⊸⊐¨(1-˜+`0=n|↕≠i)⊔i # group as set indices in v
+    #•SHow v←⊏⟜dn⊏⟜dr/((dt='v')∧dp∊(dm∊tl)//dt='k')
+
+    #•Show pi ←(1-˜m/+`>⟜»m) # parent group indices
+    ##•Show m
+    ##•Show (tk∧m)/tk×(0-˜+`m)
+    ##•Show tk
+    ##•Show z←(tk∧m)/tk×(0-˜+`m)
+    #•Show s←⊏⟜tn¨pi⊔(/m)⊏tr
+
+    ## grouped values
+    #•Show vg←(⊏⟜v¨g+¨n×↕≠g)
+
+    #s { 𝕩 }¨vg
+    #•Show /m⊏tr⊏tn
+    #•Show { 
+      #•Show z
+      ##•Show 𝕩⊏tn
+      #•Show nn←
+      #𝕩‿𝕨 
+
+    #}¨
+    #•Show nn←((/m)⊏tr)⊏tn
+    #•Show {(𝕩)⌾(z⊸⊏) nn} # access value with key offsets
+
 
     #•Show (1-˜+`tk)
     #•Show ((/m)⊏tr)⊏tn
