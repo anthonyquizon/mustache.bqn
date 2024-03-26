@@ -117,23 +117,49 @@ Compile ⇐ {
   # create find matching reference paths from keys. 
   # ie foo->bar->baz in data matches with foo->bar->baz in template rather than foo->bar->quux
   {
-    •Show trp← ⊏⟜tk˘tp PathMat /(tt='k') ⋄ n←1⊑≢trp # trp: template reference paths
-    •Show drp← ⊏⟜dk˘{ m←𝕩/˜'k'=𝕩⊏dt ⋄ n↑m∾n⥊⊑⌽m }˘ dp PathMat /(dt='k') # drp: data reference paths
-    dm↩trp⊸⊐˘drp ⋄ tm↩drp⊸⊐˘trp
+    trp← ⊏⟜tk˘tp PathMat /(tt='k') ⋄ n←1⊑≢trp # trp: template reference paths
+    drp← ⊏⟜dk˘{ m←𝕩/˜'k'=𝕩⊏dt ⋄ n↑m∾n⥊⊑⌽m }˘ dp PathMat /(dt='k') # drp: data reference paths
+    ks←trp⊸⊐˘drp ⋄ k←/tt='k' ⋄ m←ks≠≠k ⋄ ks↩(⊏⟜k)⌾(m⊸/) ks ⋄ ks↩¯1¨⌾((¬m)⊸/) ks #convert keyspace to normal index space with ¯1 as non index
+    dm↩ks⌾((dt='k')⊸/) ¯1¨dt  # mappings from data keys to template keys ¯1 if not a key
   }
 
-  # prune key strings that don't exist path matrix ie don't exist as a tempalate variable
+  # prune key strings that don't exist path matrix ie don't exist as a tempalate variable. Helps with debugging
   {
-    k←(dt='k') ⋄ m←dm=≠tm ⋄ z←(m)⌾(k⊸/) 0¨k
-    { z↩z∨(𝕩⊏z) ⋄ 𝕩⊏dp} _fix dp # mark unused data variables and remove orphanded children
-    dp↩z Delete dp ⋄ dt↩(¬z)/dt ⋄ dr↩(¬z)/dr # remove from data tree
-    # remap key maps
-    tm↩tm⊏+`¬m ⋄ dm↩(¬m)/dm
+    z←(dt='k')∧(dm=¯1) ⋄ { z↩z∨(𝕩⊏z) ⋄ 𝕩⊏dp} _fix dp # mark unused data variables and remove orphanded children
+    dp↩z Delete dp ⋄ dt↩(¬z)/dt ⋄ dr↩(¬z)/dr ⋄ dm↩(¬z)/dm
   }
 
+  #{
+    #v←dt='v'
+    #•Show p←dp⊏˜/v # parents of values
+    #•Show (p⊏dm)
+  #}
 
+  #{
+    #k←/dt='k'
+    #v←/dt='v'
+    #•Show p←v⊏dp
+    #•Show ((/tt='k')⊏tr)⊏tn
+    #•Show dm
+    #•Show tn
+    #•Show 
+    #•Show ((((k∊p)/dm)⊏(/tt='k'))⊏tr)⊏tn
+    ## set values
 
-  Draw dp 
+    ##•Show dt='k'
+    ##•Show k
+    ##•Show dm
+    ##•Show k∊tm
+    ##•Show (k⊏dr)⊏dn
+    ##•Show ((/tt='k')⊏tk)⊏kn
+
+    ##•Show (((¬k∊tm)/k)⊏dr)⊏dn
+    ## get siblings
+    
+  #}
+
+  #Draw dp 
+  #Draw tp
 
 
 
