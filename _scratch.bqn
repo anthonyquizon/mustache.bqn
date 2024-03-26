@@ -18,13 +18,20 @@ a ← {
       {banana⇐4, cheese⇐"also fig cheese"}
     ⟩}
   ⟩,
-  each⇐⟨{
-    each⇐⟨
+  each0⇐⟨{
+    each1⇐⟨
       {fig⇐0⋄banana⇐1, mango⇐2},
       {fig⇐0⋄banana⇐1, mango⇐2},
       {fig⇐0⋄banana⇐1, mango⇐2}
     ⟩
+  },{
+    each1⇐⟨
+      {fig⇐"a"⋄banana⇐"x", mango⇐2},
+      {fig⇐"b"⋄banana⇐"y", mango⇐2},
+      {fig⇐"c"⋄banana⇐"z", mango⇐2}
+    ⟩
   }⟩,
+  lemon⇐"hello lemon",
   grape⇐⟨
     {lemon⇐3, mango⇐4}
   ⟩,

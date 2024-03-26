@@ -14,8 +14,8 @@ labels ⇐ ∾⟨
   "tock"
 ⟩
 
-#v: previous value
-_fix ← { Fn←𝔽 ⋄ v←@ ⋄ {v↩𝕩 ⋄ v Fn 𝕩} •_while_ { 𝕩≢v } 𝕩 }
+#p: previous value
+_fix ← { Fn←𝔽 ⋄ p←@ ⋄ {r←p Fn 𝕩 ⋄ p↩𝕩 ⋄ r} •_while_ { 𝕩≢p } 𝕩 }
 
 Delete ← { (/𝕨)(⊢-⍋)(¬𝕨)/𝕩 }
 Parent ⇐ { g←⊔𝕩 ⋄ (↕≠𝕩) {a‿w←𝕨 ⋄ (⊏⟜a 1-˜a⍋w)⌾(w⊸⊏) 𝕩 }´ (1↓(»g){𝕨‿𝕩}¨g) }
@@ -102,6 +102,7 @@ Parse ⇐ {
 PathMat ← { p←𝕨 ⋄ pm←𝕩 ⋄ {q←𝕩⊏p ⋄ pm ↩pm∾˘q ⋄ q} _Fix pm ⋄ ¯1↓˘pm }
 #GroupIn ← { 1-˜𝕩/+`>⟜»𝕩 }
 
+# TODO rename n to s
 Compile ⇐ {
  𝕨 𝕊 𝕩 : (¬𝕩 •ns.Has "ptr") ? 𝕨 𝕊 (ParseNs 𝕩);
  𝕨 𝕊 𝕩 : 
@@ -129,11 +130,74 @@ Compile ⇐ {
     dp↩z Delete dp ⋄ dt↩(¬z)/dt ⋄ dr↩(¬z)/dr ⋄ dm↩(¬z)/dm
   }
 
-  #{
-    #v←dt='v'
-    #•Show p←dp⊏˜/v # parents of values
-    #•Show (p⊏dm)
-  #}
+
+  {
+    v←dt='v'
+    n←(v/dr)⊏dn
+    
+    p←dm⊏˜dp⊏˜/v # template parents of values
+    m←tp∊p⊏tp #template children with parent p
+    i←+`(1»≠⟜«m) # group indices
+    r ← (≠tp)↑/⁼p # repeat variables
+    x ← ∾{ ∾⟨𝕩⟩/˜1⌈⌈´𝕩⊏r }¨i⊔↕≠tp # repeat pattern
+
+    ttr←x⊏tr
+    tr↩((≠tr)+↕≠n)⌾((ttr∊p)⊸/) ttr
+    tp↩x⊏tp
+    tn↩tn∾n
+    #•Show rr↩rr∾n
+    #•Show rn↩rn∾n
+    
+    #•Show tp≍tr
+    •Show tr⊏tn
+
+
+    #•Show {{(⌈´𝕩)¨𝕩}¨𝕩}⌾(i⊸⊔) (≠tp)↑/⁼p
+
+    #•Show i⊔↕≠tp
+    #•Show 1¨⌾(m⊸/) ↕≠tp
+    #•Show 1¨⌾(m⊸/) ↕≠tp
+    #•Show {
+
+      #•Show 𝕩⊏r
+      #•Show 𝕩
+      #𝕩
+    #}⌾(m⊸/) ↕≠tp
+    #•Show {s←⌈´𝕩 ⋄ s¨𝕩}¨i⊔q
+
+    
+
+    #•Show m
+    #•Show z←⌈`(»<⟜«m)×↕≠tp
+    #•Show (0<q)
+    #•Show (0<q)×+`1»≠⟜«m
+    #•Show (/m)⍋(/0<q)
+    # get siblings
+    
+
+    #•Show (⊒p)/tp
+    #•Show tp↩(⊒p)/tp
+    #•Show (m/tr)⊏tn
+    #•Show ⌾(p⊸/) ↕≠tp
+    #•Show k←m∧tt='k' # template key children 
+    #•Show m←tp∊p⊏tp # template children with 𝕩 as parent
+
+
+    #{
+      #•Show v⊏dn
+      #•Show m←tp∊𝕩 # template children with 𝕩 as parent
+      #•Show k←m∧tt='k' # template key children 
+      ##•Show q←(1-˜+`0=(≠k)|↕≠𝕩) # group indices
+
+      ##•Show 𝕨‿𝕩‿(𝕨≠𝕩)
+      ##TODO only update items that have changed
+      #p⊏tp
+    #} _Fix p
+
+    #•Show (p⊏tr)⊏tn
+    #•Show (p⊏tp⊏tr)⊏tn
+    #•Show (p⊏tp⊏tp⊏tr)⊏tn
+  }
 
   #{
     #k←/dt='k'
