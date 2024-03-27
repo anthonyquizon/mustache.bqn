@@ -36,7 +36,7 @@ a ← {
   }⟩,
   lemon⇐"hello lemon",
   grape⇐⟨
-    {lemon⇐3, mango⇐4}
+    {mango⇐4 ⋄ lemon⇐3}
   ⟩,
 }
 
