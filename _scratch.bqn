@@ -44,9 +44,9 @@ a ← {
   #⟨[p,t,r]⇐ptr,n⇐n⟩←mustache.ParseNs a
   #(∾1↑¨r⊏n) Draw p 
 #}
-tpl ← mustache.Parse (•file.Chars "test0.mustache")
+#tpl ← mustache.Parse (•file.Chars "test0.mustache")
 #tpl ← mustache.Parse (•file.Chars "test1.mustache")
-#tpl ← mustache.Parse (•file.Chars "test2.mustache")
+tpl ← mustache.Parse (•file.Chars "test2.mustache")
 [p,t,r] ← tpl.ptr
 tpl mustache.Compile a
 

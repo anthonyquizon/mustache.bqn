@@ -137,73 +137,64 @@ Compile ⇐ {
   {
     p←v←/dt='v' ⋄ { p↩p∾˘s←𝕩⊏dp ⋄ s } _fix v ⋄ p↩¯1↓˘p 
     m←'o'=⊏⟜dt˘p ⋄ •Show n←⌈´+´˘m
-    gm←⍷⊐˘⍉p{ z←𝕩/𝕨 ⋄ z∾(n-≠z)⥊¯1↑z }˘m
+    gm←⍉p{ z←𝕩/𝕨 ⋄ z∾(n-≠z)⥊¯1↑z }˘m
 
     # TODO order keys correctly
 
+    •Show gm
+    # extend group paths to end
+    gm ↩ ⍉{ 𝕩+(⊑¯1↑(0≠𝕩)/𝕩)×0=𝕩 }˘⍉gm
     k←(1↑<˘gm)⊔e←dm⊏˜v⊏dp
     h←⟨⟩ ⋄ (↕≠v){ h↩h∾⟨(∊𝕩)/𝕨⟩⋄𝕨 }´ ⌽¯1↓<˘gm ⋄ # hierarchy list drop root - handle that as different case 
+    •Show gm
+    h↩⊐¨⍷h
 
-    #p←{ p←⟨⟩ ⋄ { x←⊑𝕩⊏tp ⋄ p↩p∾x ⋄ x } _fix 𝕩 ⋄ p↩¯1↓p }¨g
-    #•Show h
-    #pp←⟨⟩ ⋄ { pp↩pp∾⟨s←𝕩⊏tp⟩⋄s } _Fix ⊑¨k ⋄ pp↩pp# template parent path
+    ##p←{ p←⟨⟩ ⋄ { x←⊑𝕩⊏tp ⋄ p↩p∾x ⋄ x } _fix 𝕩 ⋄ p↩¯1↓p }¨g
+    ##•Show h
+    ##pp←⟨⟩ ⋄ { pp↩pp∾⟨s←𝕩⊏tp⟩⋄s } _Fix ⊑¨k ⋄ pp↩pp# template parent path
 
     ppath←⟨⟩
     { 
       ppath↩ppath∾⟨e↩∾⍷¨𝕩⊔e⊏tp⟩ 
     }¨h
 
-    •Show h↩1↓h
-    •Show ppath↩1↓ppath
-    •Show k
-    #•Show a←{/tp=𝕩}¨⊑ppath
-    •Show a←{/tp=𝕩⊏tp}¨⊑¨k
 
+    f←⊑h
+    h↩1↓h
+    ppath↩1↓ppath
+
+    •Show h
+    •Show ppath
+    #•Show k
+    ###•Show a←{/tp=𝕩}¨⊑ppath
+    •Show a←{/tp=𝕩⊏tp}¨⊑¨f⊔dm⊏˜v⊏dp
+
+    •Show "=+++++++++="
     (ppath) {
       •Show "--"
       •Show 𝕨‿𝕩
-      a↩•Show 𝕨 {
+      •Show a
+      •Show 𝕨
+      •Show 𝕩⊔a
+      a↩𝕨 {
         •Show "+"
-        •Show 𝕩
+        •Show "𝕨"‿𝕨‿"𝕩"‿𝕩
         •Show p←/tp=𝕨⊏tp
-        #•Show s←
-        •Show r←(𝕨⍷p)
-        •Show z←∾∾(𝕩¨⌾(r⊸/) p)
+        •Show r←𝕨⍷p
+        •Show ¬∨´𝕨⍷∾𝕩
+        n←(¬∨´𝕨⍷∾𝕩)
+        •Show n
+        s←𝕩
+        #•Show "b" ‿b
+        •Show z←∾{∾(s¨⌾(r⊸/) p)}⍟n 𝕩
+        z
       }¨𝕩⊔a
 
-      #•Show (a)
       #•Show ((∾a)⊏tr)⊏tn
-      #•SHow (a⊏tr)⊏tn
     }¨h
 
-      •Show (((1=∾a)/∾a)⊏tr)⊏tn
-      •Show ((∾a)⊏tr)⊏tn
-
-    #pp {
-      #p←𝕨
-      #•Show "--"
-      #•Show 𝕨‿𝕩
-      #•Show 𝕩⊔k
-      #•Show k↩∾¨𝕨 {
-        #•Show 𝕨‿𝕩
-        #(/tp=𝕨)¨𝕩
-      #} ¨ 𝕩⊔k
-      #@
-    #} ¨ h
-
-    #{
-      #•Show "--h"
-      #s← { /tp=⊑𝕩⊏tp }¨k
-        ###•Show r←𝕩⍷/tp=𝕩⊑tp
-        ##•Show r←(𝕨⍷s)
-        ##•Show c↩∾(c¨⌾(r⊸/) s)∾⟨⟨⟩⟩
-      #•Show s
-      #•Show k↩∾¨𝕩⊔s
-
-
-    #}¨h
-
-
+      •Show (a)
+    •Show ((∾a)⊏tr)⊏tn
     #rp←tp
     
     #{
