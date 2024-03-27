@@ -201,8 +201,14 @@ Compile ⇐ {
   # insert values 
   {
     v←/dt='v' 
-    p←dm⊏˜v⊏dp
-    r←(p⊐(/a∊p)⊏a)⊏(≠tr)+↕≠v # reorder values to match template order rather than data order
+    •Show p←dm⊏˜v⊏dp
+    •Show i←(⊐(v⊏dp)⊏dp)
+    •Show g←i⊔p
+    •Show +`»≠¨g
+    •Show g⊐¨i⊔(/a∊p)⊏a
+    •Show r←(≠tr)+∾(+`»≠¨g)+g⊐¨i⊔(/a∊p)⊏a
+
+    #•Show r←(p⊐(/a∊p)⊏a)⊏(≠tr)+↕≠v # reorder values to match template order rather than data order
     a↩r⌾((a∊p)⊸/) a
     tr↩tr∾(≠tn)+↕≠v
     tn↩tn∾(dn⊏˜v⊏dr)
@@ -210,6 +216,6 @@ Compile ⇐ {
 
   { a↩∾(a⊏tr)⊏tn} #render string result
 
-  a
+  •Show a
 }
 

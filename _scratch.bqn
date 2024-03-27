@@ -21,16 +21,16 @@ a ← {
   each0⇐⟨{
     each1⇐⟨{
       each2⇐⟨
-        {fig⇐0⋄banana⇐2},
-        {fig⇐1⋄banana⇐3},
+        {fig⇐"fig value"⋄banana⇐"banana value",cat⇐"cat value"},
+        {fig⇐"another fig value"⋄banana⇐"another banana value",cat⇐"another cat value"},
       ⟩
     }⟩
   },{
     each1⇐⟨{
       each2⇐⟨
-        {fig⇐"a"⋄banana⇐"x"},
-        {fig⇐"b"⋄banana⇐"y"},
-        {fig⇐"c"⋄banana⇐"z"}
+        {fig⇐"a"⋄banana⇐"x", cat⇐"p"},
+        {fig⇐"b"⋄banana⇐"y", cat⇐"q"},
+        {fig⇐"c"⋄banana⇐"z", cat⇐"r"}
       ⟩
     }⟩
   }⟩,
@@ -48,5 +48,5 @@ a ← {
 #tpl ← mustache.Parse (•file.Chars "test1.mustache")
 tpl ← mustache.Parse (•file.Chars "test2.mustache")
 [p,t,r] ← tpl.ptr
-•Show tpl mustache.Compile a
+tpl mustache.Compile a
 
