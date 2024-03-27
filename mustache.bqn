@@ -73,24 +73,16 @@ Parse ⇐ {
     ##⋄ z←¬∨⟜»m ⋄ t↩z/t⌈»»m×opn_com ⋄ r↩z/r 
     #}
 
-  # find tags - delete open and close and lead with tag flag
-  { o←t=opn_dm ⋄ c←t=cls_dm ⋄ z←¬c ⋄ t↩z/t⌈o×tag ⋄ r↩z/r }
-  # mark opn tags - consume {# and set str as id (»»)
-  { m←(t=tag)∧(«t=hash)∧(««t=str) ⋄ z←¬∨⟜»m ⋄ t↩z/t⌈»»m×opn ⋄ r↩z/r }
-  # mark cls tags - consume {/ and set str as id (»»)
-  { m←(t=tag)∧(«t=slash)∧(««t=str) ⋄ z←¬∨⟜»m ⋄ t↩z/t⌈»»m×cls ⋄ r↩z/r }
-  # mark cls tags - consume { and set str as id (»)
-  { m←(t=tag)∧(«t=str) ⋄ z←¬m ⋄ t↩z/t⌈(»m)×key ⋄ r↩z/r }
-  # create parent vector
-  { o←t=opn ⋄ c←t=cls ⋄ p↩Parent d←»+`o-c }
-  # mark opn tags as keys
-  { m←(t=opn) ⋄ t↩t⌈m×key }
+  { o←t=opn_dm ⋄ c←t=cls_dm ⋄ z←¬c ⋄ t↩z/t⌈o×tag ⋄ r↩z/r } # find tags - delete open and close and lead with tag flag
+  { m←(t=tag)∧(«t=hash)∧(««t=str) ⋄ z←¬∨⟜»m ⋄ t↩z/t⌈»»m×opn ⋄ r↩z/r } # mark opn tags - consume {# and set str as id (»»)
+  { m←(t=tag)∧(«t=slash)∧(««t=str) ⋄ z←¬∨⟜»m ⋄ t↩z/t⌈»»m×cls ⋄ r↩z/r } # mark cls tags - consume {/ and set str as id (»»)
+  { m←(t=tag)∧(«t=str) ⋄ z←¬m ⋄ t↩z/t⌈(»m)×key ⋄ r↩z/r } # mark cls tags - consume { and set str as id (»)
+  { o←t=opn ⋄ c←t=cls ⋄ p↩Parent d←»+`o-c } # create parent vector
+  { m←(t=opn) ⋄ t↩t⌈m×key } # mark opn tags as keys
 
   # TODO unique names
 
-  #Delete cls tags with unused names and shift r
-  { m←(t=cls) ⋄ z←¬m ⋄ p↩m Delete p ⋄ t↩z/t ⋄ r↩ z/r-+`¬z ⋄ n↩ z/n } 
-
+  { m←(t=cls) ⋄ z←¬m ⋄ p↩m Delete p ⋄ t↩z/t ⋄ r↩ z/r-+`¬z ⋄ n↩ z/n } #Delete cls tags with unused names and shift r
 
   # remove duplicate strings
    r↩(⊐n)⌾((0≤r)⊸/) r
@@ -198,34 +190,26 @@ Compile ⇐ {
 
   # append roots and remove root keys from a
   {
-    •Show "--"
-    •Show r←/tp=↕≠tp
-    •Show i←⊑¨a
-    •Show b←1↓¨a
+    r←/tp=↕≠tp
+    i←⊑¨a
+    b←1↓¨a
     
-    •Show m←r∊(⍷i)
-    •Show a↩∾∾((⊐i)⊔b)⌾(m⊸/) r
-
-    •Show ((a)⊏tr)⊏tn
+    m←r∊(⍷i)
+    a↩∾∾((⊐i)⊔b)⌾(m⊸/) r
   }
 
   # insert values 
   {
-    •Show v←/dt='v' 
-    •Show p←dm⊏˜v⊏dp
-    
-    •Show ≠p
-    •Show ≠v
-    •Show (/a∊p)⊏a
-
-    a↩((≠tr)+↕≠v)⌾((a∊p)⊸/) a
+    v←/dt='v' 
+    p←dm⊏˜v⊏dp
+    r←(p⊐(/a∊p)⊏a)⊏(≠tr)+↕≠v # reorder values to match template order rather than data order
+    a↩r⌾((a∊p)⊸/) a
     tr↩tr∾(≠tn)+↕≠v
     tn↩tn∾(dn⊏˜v⊏dr)
-
-    •Show (≠tr)+↕≠v
-    •Show tr
-    •Show a
-    •Show (a⊏tr)⊏tn
   }
+
+  { a↩∾(a⊏tr)⊏tn} #render string result
+
+  a
 }
 

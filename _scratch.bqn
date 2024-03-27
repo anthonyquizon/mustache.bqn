@@ -36,7 +36,7 @@ a ← {
   }⟩,
   lemon⇐"hello lemon",
   grape⇐⟨
-    {mango⇐4 ⋄ lemon⇐3}
+    {mango⇐"mango value" ⋄ lemon⇐"lemon value"}
   ⟩,
 }
 
@@ -48,5 +48,5 @@ a ← {
 #tpl ← mustache.Parse (•file.Chars "test1.mustache")
 tpl ← mustache.Parse (•file.Chars "test2.mustache")
 [p,t,r] ← tpl.ptr
-tpl mustache.Compile a
+•Show tpl mustache.Compile a
 
