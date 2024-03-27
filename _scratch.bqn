@@ -6,30 +6,33 @@ Parent ⇐ { g←⊔𝕩 ⋄ (↕≠𝕩) {a‿w←𝕨 ⋄ (⊏⟜a 1-˜a⍋w)�
 mustache ← •Import "mustache.bqn" 
 
 a ← {
-  peach⇐⟨
-    {fig⇐1, apple⇐⟨
-      {cheese⇐"hello", banana⇐2, apple⇐"apple value"}, 
-      {banana⇐3, cheese⇐"weee", apple⇐"also apple value"}
-    ⟩}
-  ⟩,
-  fig⇐⟨
-    {fig⇐1, apple⇐⟨
-      {cheese⇐"fig cheese", banana⇐3}, 
-      {banana⇐4, cheese⇐"also fig cheese"}
-    ⟩}
-  ⟩,
+  #peach⇐⟨
+    #{fig⇐1, apple⇐⟨
+      #{cheese⇐"hello", banana⇐2, apple⇐"apple value"}, 
+      #{banana⇐3, cheese⇐"weee", apple⇐"also apple value"}
+    #⟩}
+  #⟩,
+  #fig⇐⟨
+    #{fig⇐1, apple⇐⟨
+      #{cheese⇐"fig cheese", banana⇐3}, 
+      #{banana⇐4, cheese⇐"also fig cheese"}
+    #⟩}
+  #⟩,
   each0⇐⟨{
-    each1⇐⟨
-      {fig⇐0⋄banana⇐1, mango⇐2},
-      {fig⇐0⋄banana⇐1, mango⇐2},
-      {fig⇐0⋄banana⇐1, mango⇐2}
-    ⟩
+    each1⇐⟨{
+      each2⇐⟨
+        {fig⇐0⋄banana⇐2},
+        {fig⇐1⋄banana⇐3},
+      ⟩
+    }⟩
   },{
-    each1⇐⟨
-      {fig⇐"a"⋄banana⇐"x", mango⇐2},
-      {fig⇐"b"⋄banana⇐"y", mango⇐2},
-      {fig⇐"c"⋄banana⇐"z", mango⇐2}
-    ⟩
+    each1⇐⟨{
+      each2⇐⟨
+        {fig⇐"a"⋄banana⇐"x"},
+        {fig⇐"b"⋄banana⇐"y"},
+        {fig⇐"c"⋄banana⇐"z"}
+      ⟩
+    }⟩
   }⟩,
   lemon⇐"hello lemon",
   grape⇐⟨
@@ -43,6 +46,7 @@ a ← {
 #}
 tpl ← mustache.Parse (•file.Chars "test0.mustache")
 #tpl ← mustache.Parse (•file.Chars "test1.mustache")
+#tpl ← mustache.Parse (•file.Chars "test2.mustache")
 [p,t,r] ← tpl.ptr
 tpl mustache.Compile a
 
