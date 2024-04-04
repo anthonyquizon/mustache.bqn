@@ -66,7 +66,8 @@ Parse ⇐ {
 
 # TODO rename n to s
 Compile ⇐ {
- 𝕨 𝕊 𝕩 : (¬𝕩 •ns.Has "ptr") ? 𝕨 𝕊 (ParseNs 𝕩);
+ 𝕨 𝕊 𝕩 : {6≡•Type 𝕩}◶0‿{¬𝕩 •ns.Has "ptr"} 𝕩 ? 𝕨 𝕊 (ParseNs 𝕩);
+ 𝕨 𝕊 𝕩 : {6≡•Type 𝕩}◶1‿{¬𝕩 •ns.Has "ptr"} 𝕨 ? (Parse •file.Chars 𝕨) 𝕊 𝕩;
  𝕨 𝕊 𝕩 : 
   ⟨[tp,tt,tr]⇐ptr,tn⇐n⟩←𝕨 ⋄ ⟨[dp,dt,dr]⇐ptr,dn⇐n⟩←𝕩
   out←@⋄ kn←((tt='k')/tr)⊏tn ⋄ dm←@ ⋄ tk←@ ⋄ dk←@  # kn: key strings. dm: lowest data keys that map to template key paths
@@ -82,7 +83,7 @@ Compile ⇐ {
     dp↩z Delete dp ⋄ dt↩(¬z)/dt ⋄ dr↩(¬z)/dr ⋄ dm↩(¬z)/dm }                           # mark unused data variables and remove orphanded children
   {
     p←v←/dt='v' ⋄ { p↩p∾˘s←𝕩⊏dp ⋄ s } _fix v ⋄ p↩¯1↓˘p 
-    m←'o'=⊏⟜dt˘p ⋄ •Show n←⌈´+´˘m
+    m←'o'=⊏⟜dt˘p ⋄ n←⌈´+´˘m
     gm←⍉p{ z←𝕩/𝕨 ⋄ z∾(n-≠z)⥊¯1↑z }˘m
     # extend group paths to end
     gm ↩ ⍉{ 𝕩+(⊑¯1↑(0≠𝕩)/𝕩)×0=𝕩 }˘⍉gm
