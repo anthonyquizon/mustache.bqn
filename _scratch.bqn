@@ -1,4 +1,3 @@
-•Show "---"
 # delete leaf nodes - match to parent tree
 
 ⟨Draw⟩ ← •Import "tree.bqn" 
@@ -6,18 +5,18 @@ Parent ⇐ { g←⊔𝕩 ⋄ (↕≠𝕩) {a‿w←𝕨 ⋄ (⊏⟜a 1-˜a⍋w)�
 mustache ← •Import "mustache.bqn" 
 
 a ← {
-  #peach⇐⟨
-    #{fig⇐1, apple⇐⟨
-      #{cheese⇐"hello", banana⇐2, apple⇐"apple value"}, 
-      #{banana⇐3, cheese⇐"weee", apple⇐"also apple value"}
-    #⟩}
-  #⟩,
-  #fig⇐⟨
-    #{fig⇐1, apple⇐⟨
-      #{cheese⇐"fig cheese", banana⇐3}, 
-      #{banana⇐4, cheese⇐"also fig cheese"}
-    #⟩}
-  #⟩,
+  peach⇐⟨
+    {fig⇐1, apple⇐⟨
+      {cheese⇐"hello", banana⇐2, apple⇐"apple value"}, 
+      {banana⇐3, cheese⇐"weee", apple⇐"also apple value"}
+    ⟩}
+  ⟩,
+  fig⇐⟨
+    {fig⇐1, apple⇐⟨
+      {cheese⇐"fig cheese", banana⇐3}, 
+      {banana⇐4, cheese⇐"also fig cheese"}
+    ⟩}
+  ⟩,
   each0⇐⟨{
     each1⇐⟨{
       each2⇐⟨

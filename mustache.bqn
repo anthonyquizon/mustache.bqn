@@ -83,35 +83,25 @@ Compile ⇐ {
 
   # flattens tree into list of lists of references to strings
   {
-    p←v←/dt='v' ⋄ { p↩p∾˘s←𝕩⊏dp ⋄ s } _fix v ⋄ p↩¯1↓˘p # v: value list - all leaf variables in data
+    p←v←/dt='v' ⋄ { p↩p∾˘s←𝕩⊏dp ⋄ s } _fix v 
     m←'o'=⊏⟜dt˘p ⋄ n←⌈´+´˘m
     gm←⍉p{ z←𝕩/𝕨 ⋄ z∾(n-≠z)⥊¯1↑z }˘m #gm: group path matrix - allocate data leaf variables to groups depending on their parent paths. Runs top (variable) to bottom (parent) with zero being end of parent
     gm ↩ ⍉{ 𝕩+(⊑¯1↑(0≠𝕩)/𝕩)×0=𝕩 }˘⍉gm  # extend group paths to end and remove zeros
+    h←⟨⟩ ⋄ (↕≠v){ h↩h∾⟨(∊𝕩)/𝕨⟩⋄𝕨 }´ ⌽<˘gm ⋄ h↩⊐¨⍷•Show h # h: hierarchy group list - shows the groups of corresponding children to parent. eg. ⟨⟨0 0 1 1⟩ ⟨0 1⟩⟩ groups indices 0 1 to group 0 and 2 3 to group 1 in the second list. 
     e←dm⊏˜v⊏dp # e: matching template keys of data keys. Find the template keys that correspond to data keys in value list
-    h←⟨⟩ ⋄ (↕≠v){ h↩h∾⟨(∊𝕩)/𝕨⟩⋄𝕨 }´ ⌽¯1↓<˘gm ⋄ # h: hierarchy group list - shows the groups of corresponding children to parent. eg. ⟨⟨0 0 1 1⟩ ⟨0 1⟩⟩ groups indices 0 1 to group 0 and 2 3 to group 1 in the second list. Note: we  drop root - handle that as different case
-    h↩⊐¨⍷h 
-    
     pp←⟨⟩ ⋄ { pp↩pp∾⟨e↩∾⍷¨𝕩⊔e⊏tp⟩ }¨h # pp: parent paths. Construct template parent indices of corresponding groups in h
-    •Show pp
-    •Show {(𝕩⊏tr)⊏tn}¨pp
-    f←⊑h
-    h↩1↓h
-    pp↩1↓pp
-    out↩{/tp=𝕩⊏tp}¨⊑¨f⊔dm⊏˜v⊏dp
-    •Show out
-    (pp) {
+    f←⊑h # extract first since we're initializing first level
+    h↩⟨(⍷f)⟩∾1↓h # replace parent groups with already processed item since we're initializing out with children 
+    out↩{/tp=𝕩⊏tp}¨⊑¨f⊔dm⊏˜v⊏dp # initial setup of mapping leaf variables
+    pp {
       # find matching template parent and inject any children
       out↩𝕨 {
-        s←𝕩
-        p←/tp=𝕨⊏tp
-        r←𝕨⍷p
-        n←(¬∨´𝕨⍷∾𝕩)
-        ∾{∾(s¨⌾(r⊸/) p)}⍟n 𝕩
+        s←𝕩 ⋄ p←/tp=𝕨⊏tp ⋄r←𝕨⍷p ⋄ n←(¬∨´𝕨⍷∾𝕩) # p: next parent list. r: current root position that will replace with current level references. n: number to children and number of times to duplicate current template level if the parent itself exist in parent list
+        ∾{∾(s¨⌾(r⊸/) p)}⍟n 𝕩 # replace matching root position with its children values 
       }¨𝕩⊔out
     }¨h
   }
 
-  •Show {(𝕩⊏tr)⊏tn}¨out
   # append roots and remove root keys (head of lists) which are no longer needed. r: roots, i: roots of subtrees (parts of template that have variables)
   { r←/tp=↕≠tp ⋄ i←⊑¨out ⋄ b←1↓¨out
     "processed subtrees should be roots of template tree" ! 1≡∧´i⊏tp
@@ -133,6 +123,6 @@ Compile ⇐ {
 
   { out↩∾(out⊏tr)⊏tn} #render string result
 
-  out
+  •Show out
 }
 
