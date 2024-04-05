@@ -49,6 +49,6 @@ tpl ← mustache.Parse (•file.Chars "test0.mustache")
 
 #•Show •Type a
 #[p,t,r] ← tpl.ptr
-tpl mustache.Compile a
+•Show tpl mustache.Compile a
 #"test0.mustache" mustache.Compile a
 

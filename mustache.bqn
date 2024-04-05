@@ -70,6 +70,8 @@ Compile ⇐ {
  𝕨 𝕊 𝕩 : 
   ⟨[tp,tt,tr]⇐ptr,tn⇐n⟩←𝕨 ⋄ ⟨[dp,dt,dr]⇐ptr,dn⇐n⟩←𝕩
   out←@⋄ kn←((tt='k')/tr)⊏tn ⋄ dm←@ ⋄ tk←@ ⋄ dk←@  # kn: key strings. dm: lowest data keys that map to template key paths
+  Dbn ←{{•Show (𝕩⊏tr)⊏tn}¨𝕩 } #debug names
+
   # create find matching reference paths from keys. 
   # ie foo->bar->baz in data matches with foo->bar->baz in template rather than foo->bar->quux
   { k←(((tt='k')/tr)⊏tn) ⋄ tk↩¯1¨tr ⋄ tk↩(kn⊐k)⌾((tt='k')⊸/) tk }
@@ -84,14 +86,17 @@ Compile ⇐ {
   # flattens tree into list of lists of references to strings
   {
     p←v←/dt='v' ⋄ { p↩p∾˘s←𝕩⊏dp ⋄ s } _fix v 
-    m←'o'=⊏⟜dt˘p ⋄ n←⌈´+´˘m
+    m←'o'=⊏⟜dt˘p ⋄ n←⌈´+´˘m # m : group objects mask in data. n
     gm←⍉p{ z←𝕩/𝕨 ⋄ z∾(n-≠z)⥊¯1↑z }˘m #gm: group path matrix - allocate data leaf variables to groups depending on their parent paths. Runs top (variable) to bottom (parent) with zero being end of parent
     gm ↩ ⍉{ 𝕩+(⊑¯1↑(0≠𝕩)/𝕩)×0=𝕩 }˘⍉gm  # extend group paths to end and remove zeros
     h←⟨⟩ ⋄ (↕≠v){ h↩h∾⟨(∊𝕩)/𝕨⟩⋄𝕨 }´ ⌽<˘gm ⋄ h↩⊐¨⍷h # h: hierarchy group list - shows the groups of corresponding children to parent. eg. ⟨⟨0 0 1 1⟩ ⟨0 1⟩⟩ groups indices 0 1 to group 0 and 2 3 to group 1 in the second list. 
     e←dm⊏˜v⊏dp # e: matching template keys of data keys. Find the template keys that correspond to data keys in value list
     pp←⟨⟩ ⋄ { pp↩pp∾⟨e↩∾⍷¨𝕩⊔e⊏tp⟩ }¨h # pp: parent paths. Construct template parent indices of corresponding groups in h
     f←⊑h # extract first since we're initializing first level
-    h↩⟨(⍷f)⟩∾1↓h # replace parent groups with already processed item since we're initializing out with children 
+    
+    p0←((≠pp)|1)↑pp ⋄ h0 ←((≠h)|1)↑1↓h # case for when h and pp ≠ 1 
+    pp↩ (p0 {∾⍷¨𝕩⊔𝕨 }¨h0) ∾ 1↓pp # make sure pp groupings are kept consistent with h
+    h↩h0∾1↓h # replace parent groups with already processed item since we're initializing out with children 
     out↩{/tp=𝕩⊏tp}¨⊑¨f⊔dm⊏˜v⊏dp # initial setup of mapping leaf variables
     pp {
       # find matching template parent and inject any children
@@ -111,14 +116,9 @@ Compile ⇐ {
 
   # insert data values into out variable and sort in correct template order
   {
-    v←/dt='v' 
-    p←dm⊏˜v⊏dp
-    i←(⊐(v⊏dp)⊏dp)
-    g←i⊔p
+    v←/dt='v' ⋄ p←dm⊏˜v⊏dp ⋄ i←(⊐(v⊏dp)⊏dp) ⋄ g←i⊔p
     r←(≠tr)+∾(+`»≠¨g)+g⊐¨i⊔(/out∊p)⊏out
-    out↩r⌾((out∊p)⊸/) out
-    tr↩tr∾(≠tn)+↕≠v
-    tn↩tn∾(dn⊏˜v⊏dr)
+    out↩r⌾((out∊p)⊸/) out ⋄ tr↩tr∾(≠tn)+↕≠v ⋄ tn↩tn∾(dn⊏˜v⊏dr)
   }
 
   { out↩∾(out⊏tr)⊏tn} #render string result
