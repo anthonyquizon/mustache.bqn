@@ -83,7 +83,7 @@ Compile ⇐ {
   { z←(dt='k')∧(dm=¯1) ⋄ { z↩z∨(𝕩⊏z) ⋄ 𝕩⊏dp} _fix dp                                  # prune key strings that don't exist path matrix ie don't exist as a tempalate variable. Helps with debuhing
     dp↩z Delete dp ⋄ dt↩(¬z)/dt ⋄ dr↩(¬z)/dr ⋄ dm↩(¬z)/dm }                           # mark unused data variables and remove orphanded children
 
-  # flattens tree into list of lists of references to strings
+  # flattens tree into list of reference lists ordered by root nodes
   {
     p←v←/dt='v' ⋄ { p↩p∾˘s←𝕩⊏dp ⋄ s } _fix v 
     m←'o'=⊏⟜dt˘p ⋄ n←⌈´+´˘m # m : group objects mask in data. n
@@ -95,8 +95,9 @@ Compile ⇐ {
     f←⊑h # extract first since we're initializing first level
     
     p0←((≠pp)|1)↑pp ⋄ h0 ←((≠h)|1)↑1↓h # case for when h and pp ≠ 1 
-    pp↩ (p0 {∾⍷¨𝕩⊔𝕨 }¨h0) ∾ 1↓pp # make sure pp groupings are kept consistent with h
-    h↩h0∾1↓h # replace parent groups with already processed item since we're initializing out with children 
+    pp↩ (p0 {∾⍷¨𝕩⊔𝕨 }¨h0) ∾ 2↓pp # make sure pp groupings are kept consistent with h
+    h↩h0∾2↓h # replace parent groups with already processed item since we're initializing out with children 
+
     out↩{/tp=𝕩⊏tp}¨⊑¨f⊔dm⊏˜v⊏dp # initial setup of mapping leaf variables
     pp {
       # find matching template parent and inject any children
