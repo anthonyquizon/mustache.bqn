@@ -14,6 +14,7 @@ labels ⇐ ∾⟨
   "tock"
 ⟩
 
+⟨Draw⟩←•Import "tree.bqn"
 #p: previous value
 _fix ← { Fn←𝔽 ⋄ p←@ ⋄ {r←p Fn 𝕩 ⋄ p↩𝕩 ⋄ r} •_while_ { 𝕩≢p } 𝕩 ⋄ p }
 
@@ -63,11 +64,9 @@ Parse ⇐ {
   { ptr⇐ [p, ⊢◶labels¨t, r] ⋄ n⇐n }
 }
 
-
-# TODO rename n to s
 Compile ⇐ {
  𝕨 𝕊 𝕩 : {6≡•Type 𝕩}◶0‿{¬𝕩 •ns.Has "ptr"} 𝕩 ? 𝕨 𝕊 (ParseNs 𝕩);
- 𝕨 𝕊 𝕩 : {6≡•Type 𝕩}◶1‿{¬𝕩 •ns.Has "ptr"} 𝕨 ? (Parse •file.Chars 𝕨) 𝕊 𝕩;
+ 𝕨 𝕊 𝕩 : {6≡•Type 𝕩}◶1‿{¬𝕩 •ns.Has "ptr"} 𝕨 ? (Parse 𝕨) 𝕊 𝕩;
  𝕨 𝕊 𝕩 : 
   ⟨[tp,tt,tr]⇐ptr,tn⇐n⟩←𝕨 ⋄ ⟨[dp,dt,dr]⇐ptr,dn⇐n⟩←𝕩
   out←@⋄ kn←((tt='k')/tr)⊏tn ⋄ dm←@ ⋄ tk←@ ⋄ dk←@  # kn: key strings. dm: lowest data keys that map to template key paths
@@ -81,21 +80,27 @@ Compile ⇐ {
     dm↩ks⌾((dt='k')⊸/) ¯1¨dt }                                                        # mappings from data keys to template keys ¯1 if not a key
   { z←(dt='k')∧(dm=¯1) ⋄ { z↩z∨(𝕩⊏z) ⋄ 𝕩⊏dp} _fix dp                                  # prune key strings that don't exist path matrix ie don't exist as a tempalate variable. Helps with debuhing
     dp↩z Delete dp ⋄ dt↩(¬z)/dt ⋄ dr↩(¬z)/dr ⋄ dm↩(¬z)/dm }                           # mark unused data variables and remove orphanded children
+
+  # flattens tree into list of lists of references to strings
   {
-    p←v←/dt='v' ⋄ { p↩p∾˘s←𝕩⊏dp ⋄ s } _fix v ⋄ p↩¯1↓˘p 
+    p←v←/dt='v' ⋄ { p↩p∾˘s←𝕩⊏dp ⋄ s } _fix v ⋄ p↩¯1↓˘p # v: value list - all leaf variables in data
     m←'o'=⊏⟜dt˘p ⋄ n←⌈´+´˘m
-    gm←⍉p{ z←𝕩/𝕨 ⋄ z∾(n-≠z)⥊¯1↑z }˘m
-    # extend group paths to end
-    gm ↩ ⍉{ 𝕩+(⊑¯1↑(0≠𝕩)/𝕩)×0=𝕩 }˘⍉gm
-    k←(1↑<˘gm)⊔e←dm⊏˜v⊏dp
-    h←⟨⟩ ⋄ (↕≠v){ h↩h∾⟨(∊𝕩)/𝕨⟩⋄𝕨 }´ ⌽¯1↓<˘gm ⋄ # hierarchy list drop root - handle that as different case 
-    h↩⊐¨⍷h
-    ppath←⟨⟩ ⋄ { ppath↩ppath∾⟨e↩∾⍷¨𝕩⊔e⊏tp⟩ }¨h
+    gm←⍉p{ z←𝕩/𝕨 ⋄ z∾(n-≠z)⥊¯1↑z }˘m #gm: group path matrix - allocate data leaf variables to groups depending on their parent paths. Runs top (variable) to bottom (parent) with zero being end of parent
+    gm ↩ ⍉{ 𝕩+(⊑¯1↑(0≠𝕩)/𝕩)×0=𝕩 }˘⍉gm  # extend group paths to end and remove zeros
+    e←dm⊏˜v⊏dp # e: matching template keys of data keys. Find the template keys that correspond to data keys in value list
+    h←⟨⟩ ⋄ (↕≠v){ h↩h∾⟨(∊𝕩)/𝕨⟩⋄𝕨 }´ ⌽¯1↓<˘gm ⋄ # h: hierarchy group list - shows the groups of corresponding children to parent. eg. ⟨⟨0 0 1 1⟩ ⟨0 1⟩⟩ groups indices 0 1 to group 0 and 2 3 to group 1 in the second list. Note: we  drop root - handle that as different case
+    h↩⊐¨⍷h 
+    
+    pp←⟨⟩ ⋄ { pp↩pp∾⟨e↩∾⍷¨𝕩⊔e⊏tp⟩ }¨h # pp: parent paths. Construct template parent indices of corresponding groups in h
+    •Show pp
+    •Show {(𝕩⊏tr)⊏tn}¨pp
     f←⊑h
     h↩1↓h
-    ppath↩1↓ppath
+    pp↩1↓pp
     out↩{/tp=𝕩⊏tp}¨⊑¨f⊔dm⊏˜v⊏dp
-    (ppath) {
+    •Show out
+    (pp) {
+      # find matching template parent and inject any children
       out↩𝕨 {
         s←𝕩
         p←/tp=𝕨⊏tp
@@ -106,13 +111,15 @@ Compile ⇐ {
     }¨h
   }
 
-  # append roots and remove root keys from a
+  •Show {(𝕩⊏tr)⊏tn}¨out
+  # append roots and remove root keys (head of lists) which are no longer needed. r: roots, i: roots of subtrees (parts of template that have variables)
   { r←/tp=↕≠tp ⋄ i←⊑¨out ⋄ b←1↓¨out
-    m←r∊(⍷i)
+    "processed subtrees should be roots of template tree" ! 1≡∧´i⊏tp
+    m←r∊(⍷i) # get unprocessed root nodes only
     out↩∾∾((⊐i)⊔b)⌾(m⊸/) r
   }
 
-  # insert data values into out
+  # insert data values into out variable and sort in correct template order
   {
     v←/dt='v' 
     p←dm⊏˜v⊏dp
@@ -126,6 +133,6 @@ Compile ⇐ {
 
   { out↩∾(out⊏tr)⊏tn} #render string result
 
-  •Show out
+  out
 }
 
