@@ -87,7 +87,7 @@ Compile ⇐ {
     m←'o'=⊏⟜dt˘p ⋄ n←⌈´+´˘m
     gm←⍉p{ z←𝕩/𝕨 ⋄ z∾(n-≠z)⥊¯1↑z }˘m #gm: group path matrix - allocate data leaf variables to groups depending on their parent paths. Runs top (variable) to bottom (parent) with zero being end of parent
     gm ↩ ⍉{ 𝕩+(⊑¯1↑(0≠𝕩)/𝕩)×0=𝕩 }˘⍉gm  # extend group paths to end and remove zeros
-    h←⟨⟩ ⋄ (↕≠v){ h↩h∾⟨(∊𝕩)/𝕨⟩⋄𝕨 }´ ⌽<˘gm ⋄ h↩⊐¨⍷•Show h # h: hierarchy group list - shows the groups of corresponding children to parent. eg. ⟨⟨0 0 1 1⟩ ⟨0 1⟩⟩ groups indices 0 1 to group 0 and 2 3 to group 1 in the second list. 
+    h←⟨⟩ ⋄ (↕≠v){ h↩h∾⟨(∊𝕩)/𝕨⟩⋄𝕨 }´ ⌽<˘gm ⋄ h↩⊐¨⍷h # h: hierarchy group list - shows the groups of corresponding children to parent. eg. ⟨⟨0 0 1 1⟩ ⟨0 1⟩⟩ groups indices 0 1 to group 0 and 2 3 to group 1 in the second list. 
     e←dm⊏˜v⊏dp # e: matching template keys of data keys. Find the template keys that correspond to data keys in value list
     pp←⟨⟩ ⋄ { pp↩pp∾⟨e↩∾⍷¨𝕩⊔e⊏tp⟩ }¨h # pp: parent paths. Construct template parent indices of corresponding groups in h
     f←⊑h # extract first since we're initializing first level
@@ -123,6 +123,6 @@ Compile ⇐ {
 
   { out↩∾(out⊏tr)⊏tn} #render string result
 
-  •Show out
+  out
 }
 
