@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+find . -name '*.bqn' -o -name '*.mustache' -o -name '*.expected' | entr bqn mustache.test.bqn
