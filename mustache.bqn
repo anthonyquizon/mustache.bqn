@@ -110,7 +110,7 @@ Compile ⇐ {
 
   # append roots and remove root keys (head of lists) which are no longer needed. r: roots, i: roots of subtrees (parts of template that have variables)
   { r←/tp=↕≠tp ⋄ i←⊑¨out ⋄ b←1↓¨out
-    "processed subtrees should be roots of template tree" ! 1≡∧´i⊏tp
+    "processed subtrees should be roots of template tree" ! 1≡∧´i∊tp
     m←r∊(⍷i) # get unprocessed root nodes only
     out↩∾∾((⊐i)⊔b)⌾(m⊸/) r
   }
