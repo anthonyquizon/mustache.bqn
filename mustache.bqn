@@ -90,14 +90,32 @@ Compile ⇐ {
   rp←tp
   rr←tr
   'n' Draw rp
+  tt Draw rp
   #'p' Draw rp
 
-  { pp←v←dmap⊏˜dp⊏˜/dt='v' ⋄ { pp↩pp∾˘s←𝕩⊏tp ⋄ s } _fix pp ⋄ pp↩1↓<˘⍉¯1↓˘pp # pp: parent path. Drop root self reference.
+  # pass unique names?
+
+  { 
+  #pp←v←dmap⊏˜dp⊏˜/dt='v' ⋄ { pp↩pp∾˘s←𝕩⊏tp ⋄ s } _fix pp ⋄ pp↩1↓<˘⍉¯1↓˘pp # pp: parent path. Drop root self reference.
+    pp←v←dmap⊏˜dp⊏˜/dt='v' ⋄ { pp↩pp∾˘s←𝕩⊏tp ⋄ s } _fix pp ⋄ pp↩¯1↓˘pp # pp: parent path. Drop root self reference.
+    n←≠⍉pp
+    #{•Show (¯1⊑𝕩)⊸«⍟n ⍷𝕩⋄𝕩}˘pp
+    •Show { u←⍷𝕩 ⋄ u/˜(1+n-≠u)∾1↓1¨u }˘pp
+    •Show { 𝕩⊏tr⊏tn }˘{ u←⍷𝕩 ⋄ u/˜(1+n-≠u)∾1↓1¨u }˘pp
+    # number of repeats for parents can be found by number of groups in its children
+    #•Show { ⊐𝕩 }˘⍉pp # parent groups
+    #•Show m←{ 
+      #⊐+`»⊸≠𝕩 
+    #}˘⍉pp # parent groups
+    #{}¨⍉pp
     #v↩v⊔˜⊐+`»⊸≠v
     
-    •Show v
+    # count children
+    •Show ⌽⍉pp
+    #•Show dp⊏˜/dt='v' 
+    #•Show v
     #•Show rp
-    #•Show rr
+    #•Show r
     #(↕≠rp) Draw rp↩(rp∾v⊏rp)
     #•Show v
     #•Show v⊏tp
