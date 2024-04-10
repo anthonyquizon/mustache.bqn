@@ -34,11 +34,11 @@ ParseNs ⇐ {
        ⟨s,d,t⟩ ← 0 𝕊 𝕩 
        {ptr⇐[Parent d,t,⊐s], n⇐⍷s};
   d 𝕊 ns : 6≡•Type ns ? 
-    c←∾¨´{ ⟨⟨𝕩⟩, (d+1), ⟨'k'⟩⟩ ∾¨ (d+2) ParseNs (ns •ns.Get 𝕩) } ¨•ns.Keys ns
-    ⟨⟨"⍉"⟩, ⟨d⟩, ⟨'o'⟩⟩ ∾¨ c;
+    c←∾¨´{⟨⟨𝕩⟩,(d+1),⟨'k'⟩⟩∾¨(d+2) ParseNs (ns •ns.Get 𝕩)}¨•ns.Keys ns
+    ⟨⟨"⍉"⟩,⟨d⟩,⟨'o'⟩⟩∾¨c; #⍉ is null string and will be indexed as 0
   d 𝕊 𝕩 : 0≡•Type 𝕩 ?
-    { 𝕊 s : ∧´2⊸≡∘•Type¨s ? ⟨⟨s⟩, ⟨d⟩, ⟨'v'⟩⟩ ; # parse string
-      𝕊 𝕩 : ∾¨´{ (d) ParseNs 𝕩}¨𝕩 
+    { 𝕊 s : ∧´2⊸≡∘•Type¨s ? ⟨⟨s⟩,⟨d⟩,⟨'v'⟩⟩ ; # parse string
+      𝕊 𝕩 : ∾¨´{(d) ParseNs 𝕩}¨𝕩 
     } 𝕩;
   𝕨 𝕊 𝕩 : 1≡•Type 𝕩 ? 𝕨 𝕊 •Fmt 𝕩
 }
@@ -64,7 +64,6 @@ Parse ⇐ {
   { ptr⇐ [p, t, r] ⋄ n⇐n }
 }
 
-
 Compile ⇐ {
  𝕨 𝕊 𝕩 : {6≡•Type 𝕩}◶0‿{¬𝕩 •ns.Has "ptr"} 𝕩 ? 𝕨 𝕊 (ParseNs 𝕩);
  𝕨 𝕊 𝕩 : {6≡•Type 𝕩}◶1‿{¬𝕩 •ns.Has "ptr"} 𝕨 ? (Parse 𝕨) 𝕊 𝕩;
@@ -89,13 +88,11 @@ Compile ⇐ {
     dpp↩(¬2|↕≠⍉dpp)⊸/˘dpp # remove object parents
     tpp←⊏⟜dmap˘dpp
 
-    #•Show ⌽⍉tpp
-    #•Show ⌽⍉dpp
+    •Show ⌽⍉tpp
+    •Show ⌽⍉dpp
 
-    #'n' Draw dp
-    #•Show [(/dt='v'),(/dt='v')⊏dr⊏dn]
-    #•Show [/(dt='v'), dp⊏˜/(dt='v'),(dp⊏˜/(dt='v'))⊏dr⊏dn,(dt='v')/dmap, (/dt='v')⊏dr⊏dn]
-    #n←≠⍉dpp
+    (dr⊏dn) Draw dp
+    #•Show [↕≠dr,]
     #•Show ⌽⍉{ u←⍷𝕩 ⋄ u/˜(1+n-≠u)∾1↓1¨u }˘dpp
     #•Show {⊐+`»⊸≠𝕩 }˘⌽⍉{ u←⍷𝕩 ⋄ u/˜(1+n-≠u)∾1↓1¨u }˘dpp
     •Exit 0

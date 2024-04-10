@@ -26,7 +26,7 @@ Draw ⇐ {
  'p' 𝕊 𝕩: 𝕩 𝕊 𝕩;
  'n' 𝕊 𝕩: (↕≠𝕩) 𝕊 𝕩;
   𝕨  𝕊 𝕩:
-    ch ← 2↑¨•Type◶⟨⊢,•Fmt, ⊢⟩¨𝕨 
+    ch ← 2↑¨•Type◶⟨"⟨⟩"⍟(0⊸=≠),•Fmt, ⊢⟩¨𝕨 
     p←𝕩 ⋄ r←{𝕩⊏p} _fix p ⋄ d←Depth 𝕩                    # r: roots. d: depth
     {
 
