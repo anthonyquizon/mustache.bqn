@@ -21,7 +21,12 @@ _fix ← { Fn←𝔽 ⋄ p←@ ⋄ {r←p Fn 𝕩 ⋄ p↩𝕩 ⋄ r} •_while_
 Delete ← { (/𝕨)(⊢-⍋)(¬𝕨)/𝕩 }
 Parent ⇐ { g←⊔𝕩 ⋄ (↕≠𝕩) {a‿w←𝕨 ⋄ (⊏⟜a 1-˜a⍋w)⌾(w⊸⊏) 𝕩 }´ (1↓(»g){𝕨‿𝕩}¨g) }
 Depth  ⇐ { p←𝕩 ⋄ d←p≠(↕≠p) ⋄ { z←𝕩⊏p ⋄ d+↩z≠𝕩 ⋄ z } _Fix p ⋄ d } 
-PathMat ← { p←𝕨 ⋄ pp←𝕩 ⋄ {q←𝕩⊏p ⋄ pp ↩pp∾˘q ⋄ q} _Fix pp ⋄ ¯1↓˘pp }
+
+# parent paths - construct parent paths. Drop self reference root
+PP ← { 
+    𝕊 t‿p: (/t='k') PP t‿p;
+  v 𝕊 t‿p: { v↩v∾˘q←𝕩⊏p ⋄ q } _Fix v ⋄ ¯1↓˘v 
+} 
 
 # parse namespaces and to parent tree
 ParseNs ⇐ {
@@ -76,8 +81,7 @@ Compile ⇐ {
   dmap←@ # map of data key indices to template key indices
 
   # find matching key paths
-  { KP ← { p 𝕊 t: pp←/t='k' ⋄ { q←𝕩⊏p ⋄ pp↩pp∾˘q ⋄ q } _Fix pp ⋄ ¯1↓˘pp } # key paths - construct parent paths of keys. Drop self reference root
-    trp←⊏⟜tr¨⍷¨<˘tp KP tt ⋄ dkp← {𝕩/˜'k'=𝕩⊏dt}¨<˘dp KP dt # trp: template reference path - key paths as references. dkp: key path of data with non key parents removed
+  { trp←⊏⟜tr¨⍷¨<˘ PP tt‿tp ⋄ dkp← {𝕩/˜'k'=𝕩⊏dt}¨<˘ PP dt‿dp # trp: template reference path - key paths as references. dkp: key path of data with non key parents removed
     m←dt='k'⋄ map←¯1¨⌾((¬m)⊸/) { tn⊐𝕩⊏dn }⌾(m⊸/) dr # map of data keys to template keys (assumes keys point to unique names)
     dmap↩((¯1∾˜/tt='k')⊏˜trp⊐⊏⟜map¨dkp)⌾(m⊸/) ¯1¨dr # data mapping of keys to template reference map indices 
   } 
@@ -87,31 +91,53 @@ Compile ⇐ {
     dp↩z Delete dp ⋄ dt↩(¬z)/dt ⋄ dr↩(¬z)/dr ⋄ dmap↩(¬z)/dmap # mark unused data variables and remove orphanded children
   }                           
 
+  #Draw dp
   rp←tp
   rr←tr
-  'n' Draw rp
-  tt Draw rp
   #'p' Draw rp
-
   # pass unique names?
 
   { 
-  #pp←v←dmap⊏˜dp⊏˜/dt='v' ⋄ { pp↩pp∾˘s←𝕩⊏tp ⋄ s } _fix pp ⋄ pp↩1↓<˘⍉¯1↓˘pp # pp: parent path. Drop root self reference.
-    pp←v←dmap⊏˜dp⊏˜/dt='v' ⋄ { pp↩pp∾˘s←𝕩⊏tp ⋄ s } _fix pp ⋄ pp↩¯1↓˘pp # pp: parent path. Drop root self reference.
-    n←≠⍉pp
+    v←dp⊏˜/dt='v'
+    tpp← (dmap⊏˜v) PP tt‿tp ⋄ dpp← v PP dt‿dp 
+
+    •Show ⌽⍉tpp
+    •Show ⌽⍉dpp
+
+    #•Show (dp⊏˜/dt='v')⌽⍉dp PP dt
+
+    #n←≠⍉pp
+    #'n' Draw dp
+
     #{•Show (¯1⊑𝕩)⊸«⍟n ⍷𝕩⋄𝕩}˘pp
-    •Show { u←⍷𝕩 ⋄ u/˜(1+n-≠u)∾1↓1¨u }˘pp
-    •Show { 𝕩⊏tr⊏tn }˘{ u←⍷𝕩 ⋄ u/˜(1+n-≠u)∾1↓1¨u }˘pp
+    •Show "--"
+    #•Show { u←⍷𝕩 ⋄ u/˜(1+n-≠u)∾1↓1¨u }˘pp
+    #•Show ⍷pp
+
+
+    #USE DATA PARENT PATHH FOR GROUPs
+    #•Show k←tt='k'
+    #•Show { /k∧tp=𝕩 }¨/k
+    #•Show {𝕩⊏tr⊏tn}¨{ /k∧tp=𝕩 }¨/k
+
+    #•Show ⌽⍉{ u←⍷𝕩 ⋄ u/˜(1+n-≠u)∾1↓1¨u }˘pp
+    #•Show {⊐+`»⊸≠𝕩 }˘⌽⍉{ u←⍷𝕩 ⋄ u/˜(1+n-≠u)∾1↓1¨u }˘pp
+    •Exit 1
+
+    #'n' Draw rp
+    #'n' Draw dp
+    #tt Draw rp
+    #•Show { 𝕩⊏tr⊏tn }˘{ u←⍷𝕩 ⋄ u/˜(1+n-≠u)∾1↓1¨u }˘pp
     # number of repeats for parents can be found by number of groups in its children
     #•Show { ⊐𝕩 }˘⍉pp # parent groups
     #•Show m←{ 
-      #⊐+`»⊸≠𝕩 
+      #
     #}˘⍉pp # parent groups
     #{}¨⍉pp
     #v↩v⊔˜⊐+`»⊸≠v
     
     # count children
-    •Show ⌽⍉pp
+    #•Show ⌽⍉pp
     #•Show dp⊏˜/dt='v' 
     #•Show v
     #•Show rp
