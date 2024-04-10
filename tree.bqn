@@ -18,6 +18,8 @@ _Fix   ← {𝔽∘⊢⍟≢⟜𝔽_𝕣∘⊢⍟≢⟜𝔽𝕩}
 
 ⟨none, horz, mid, start, end, vert⟩ ← ↕6
 
+# TODO fix 0‿0‿1‿0‿2
+
 Draw ⇐ {
      𝕊 𝕩: ((≠𝕩)⥊⟨"○"⟩) 𝕊 𝕩;
  'o' 𝕊 𝕩: ((≠𝕩)⥊⟨"○"⟩) 𝕊 𝕩;
@@ -27,12 +29,12 @@ Draw ⇐ {
     ch ← 2↑¨•Type◶⟨⊢,•Fmt, ⊢⟩¨𝕨 
     p←𝕩 ⋄ r←{𝕩⊏p} _fix p ⋄ d←Depth 𝕩                    # r: roots. d: depth
     {
-      par←@ ⋄ h←@ ⋄ n←@ ⋄ m←𝕩=r                         # init empty variables for hacking convience and mask for current root
+
+      i←@ ⋄ par←@ ⋄ h←@ ⋄ n←@ ⋄ m←𝕩=r                   # init empty variables for hacking convience and mask for current root
       par↩{ (1+𝕩/m/p)⌾(𝕩⊸/) 𝕩 }˘m⊸/˘d=⌜˜↕⌈´d+1          # depth matrix to parent vector offset by 1 since null values are 0
       par↩∾˘(↕≠par) {«⍟𝕨 𝕩} ˘par                        # shift diagonal zeros to vertical line
       s←×⟜∊˘par×>⟜»˘par ⋄ e←×⟜{⌽∊⌽𝕩}˘ par×>⟜«˘par       # mark start and ends of parent horizontals
 
-      i←@ 
       i↩{ (1+𝕩/m/↕≠p)⌾(𝕩⊸/) 𝕩 }˘m⊸/˘d=⌜˜↕⌈´d+1          # depth matrix to parent vector offset by 1 since null values are 0
       i↩∾˘(↕≠i) {«⍟𝕨 𝕩} ˘i                              # shift diagonal zeros to vertical line
 
@@ -49,6 +51,7 @@ Draw ⇐ {
       h↩h⌊vert                                          # clamp to vertical bar if both start and end
 
       { •Out ∾⊢◶("  "‿"──"‿"┬─"‿"├─"‿"┐ "‿"│ "∾ch)¨𝕩 }¨<˘h⌈n
+      @
     }¨⍷r
 }
 

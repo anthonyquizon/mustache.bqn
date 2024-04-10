@@ -32,17 +32,10 @@ PP ← {
 ParseNs ⇐ {
     𝕊 𝕩 :  
        ⟨s,d,t⟩ ← 0 𝕊 𝕩 
-       m←0⊸=∘≠¨s ⋄ p←(Parent d) 
-       # remove empty strings
-       r←(↕(≠s)-(≠/m))⌾((¬m)⊸/) (≠s)⥊¯1 ⋄ n← s↩(¬m)/s
-       # remove duplicate strings
-       r↩(⊐n)⌾((0≤r)⊸/) r
-       n↩ ⍷n 
-
-       {ptr⇐[p,t,r], n⇐n};
+       {ptr⇐[Parent d,t,⊐s], n⇐⍷s};
   d 𝕊 ns : 6≡•Type ns ? 
-    children←∾¨´{ ⟨⟨𝕩⟩, (d+1), ⟨'k'⟩⟩ ∾¨ (d+2) ParseNs (ns •ns.Get 𝕩) } ¨•ns.Keys ns
-    ⟨⟨""⟩, ⟨d⟩, ⟨'o'⟩⟩ ∾¨ children;
+    c←∾¨´{ ⟨⟨𝕩⟩, (d+1), ⟨'k'⟩⟩ ∾¨ (d+2) ParseNs (ns •ns.Get 𝕩) } ¨•ns.Keys ns
+    ⟨⟨"⍉"⟩, ⟨d⟩, ⟨'o'⟩⟩ ∾¨ c;
   d 𝕊 𝕩 : 0≡•Type 𝕩 ?
     { 𝕊 s : ∧´2⊸≡∘•Type¨s ? ⟨⟨s⟩, ⟨d⟩, ⟨'v'⟩⟩ ; # parse string
       𝕊 𝕩 : ∾¨´{ (d) ParseNs 𝕩}¨𝕩 
@@ -91,101 +84,21 @@ Compile ⇐ {
     dp↩z Delete dp ⋄ dt↩(¬z)/dt ⋄ dr↩(¬z)/dr ⋄ dmap↩(¬z)/dmap # mark unused data variables and remove orphanded children
   }                           
 
-  #Draw dp
-  rp←tp
-  rr←tr
-  #'p' Draw rp
-  # pass unique names?
-
   { 
-    v←dp⊏˜/dt='v'
-    tpp← (dmap⊏˜v) PP tt‿tp ⋄ dpp← v PP dt‿dp 
+    dpp←(dp⊏˜/dt='v') PP dt‿dp 
+    dpp↩(¬2|↕≠⍉dpp)⊸/˘dpp # remove object parents
+    tpp←⊏⟜dmap˘dpp
 
-    •Show ⌽⍉tpp
-    •Show ⌽⍉dpp
+    #•Show ⌽⍉tpp
+    #•Show ⌽⍉dpp
 
-    #•Show (dp⊏˜/dt='v')⌽⍉dp PP dt
-
-    #n←≠⍉pp
     #'n' Draw dp
-
-    #{•Show (¯1⊑𝕩)⊸«⍟n ⍷𝕩⋄𝕩}˘pp
-    •Show "--"
-    #•Show { u←⍷𝕩 ⋄ u/˜(1+n-≠u)∾1↓1¨u }˘pp
-    #•Show ⍷pp
-
-
-    #USE DATA PARENT PATHH FOR GROUPs
-    #•Show k←tt='k'
-    #•Show { /k∧tp=𝕩 }¨/k
-    #•Show {𝕩⊏tr⊏tn}¨{ /k∧tp=𝕩 }¨/k
-
-    #•Show ⌽⍉{ u←⍷𝕩 ⋄ u/˜(1+n-≠u)∾1↓1¨u }˘pp
-    #•Show {⊐+`»⊸≠𝕩 }˘⌽⍉{ u←⍷𝕩 ⋄ u/˜(1+n-≠u)∾1↓1¨u }˘pp
-    •Exit 1
-
-    #'n' Draw rp
-    #'n' Draw dp
-    #tt Draw rp
-    #•Show { 𝕩⊏tr⊏tn }˘{ u←⍷𝕩 ⋄ u/˜(1+n-≠u)∾1↓1¨u }˘pp
-    # number of repeats for parents can be found by number of groups in its children
-    #•Show { ⊐𝕩 }˘⍉pp # parent groups
-    #•Show m←{ 
-      #
-    #}˘⍉pp # parent groups
-    #{}¨⍉pp
-    #v↩v⊔˜⊐+`»⊸≠v
-    
-    # count children
-    #•Show ⌽⍉pp
-    #•Show dp⊏˜/dt='v' 
-    #•Show v
-    #•Show rp
-    #•Show r
-    #(↕≠rp) Draw rp↩(rp∾v⊏rp)
-    #•Show v
-    #•Show v⊏tp
-    #'p' Draw 0‿0‿1‿1‿1‿0‿5‿5‿5
-    #'n' Draw 0‿0‿1‿1‿1‿0‿5‿5‿5
-
-    #•Show tr⊏tn
-
-
-
-
-    #g←{ 𝕊 a‿b : ⊑¨b⊔˜⊐+`»⊸≠a }¨¯1↓pp⋈¨«pp # parent groups
-    ##s←{{/𝕩=tp}¨𝕩 }¨g # sibling groups
-
-    #•Show v
-    #•Show 0⊑g
-    #•Show (0⊏pp){
-      #•Show 𝕨
-      #•Show /𝕩=tp
-    #}¨0⊑g
-
-    #(0⊑pairs) {
-      #p0‿s0 𝕊 p1‿s1:
-        #•Show s1
-        ##•Show p0 { 𝕨=𝕩 }¨s1
-
-    #} (1⊑pairs)
-    #•Show s
-    #(0⊑s){
-      #•Show 𝕨
-      #•Show 𝕩
-
-    #} 1⊑s
-
-    #•Show 
-    #•Show v
-    #(<v) {
-      #•Shjow "--"
-      #•Show g←𝕩⊔˜⊐+`»⊸≠ 𝕩
-      #•Show s←{/𝕩=tp}¨𝕩
-      #g {   
-        #•Show 𝕨
-      #}¨s 
-    #}`g
+    #•Show [(/dt='v'),(/dt='v')⊏dr⊏dn]
+    #•Show [/(dt='v'), dp⊏˜/(dt='v'),(dp⊏˜/(dt='v'))⊏dr⊏dn,(dt='v')/dmap, (/dt='v')⊏dr⊏dn]
+    #n←≠⍉dpp
+    #•Show ⌽⍉{ u←⍷𝕩 ⋄ u/˜(1+n-≠u)∾1↓1¨u }˘dpp
+    #•Show {⊐+`»⊸≠𝕩 }˘⌽⍉{ u←⍷𝕩 ⋄ u/˜(1+n-≠u)∾1↓1¨u }˘dpp
+    •Exit 0
   }
 
   # append roots and remove root keys (head of lists) which are no longer needed. r: roots, i: roots of subtrees (parts of template that have variables)
